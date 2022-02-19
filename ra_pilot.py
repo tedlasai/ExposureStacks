@@ -33,20 +33,30 @@ def main():
 
     Button = app1.EOS5DMarkIV.child_window(auto_id="takePictureButton",control_type="EOSUtility.TakePictureButton").wrapper_object() # This magically works too
 
+    time.sleep(5)
+
     Button.click_input()
 
+    time.sleep(2)
+
+    Button.click_input()
+
+
+    time.sleep(3)
     # Button1 = app1.EOS5DMarkIV.child_window(auto_id="olcTv", control_type="EOSUtility.OLCTv").wrapper_object() # Shutter Speed
 
     # Button2 = app1.EOS5DMarkIV.child_windowchild_window(auto_id="olcAv", control_type="EOSUtility.OLCAv").wrapper_object() # Aperture
 
-    shutter = app1.EOS5DMarkIV.child_window(auto_id="olcTv", control_type="EOSUtility.OLCTv").wrapper_object() # Shutter Speed
-
-    shutter.click_input()
+    # shutter = app1.EOS5DMarkIV.child_window(auto_id="olcTv", control_type="EOSUtility.OLCTv").wrapper_object() # Shutter Speed
+    #
+    # shutter.click_input()
     # shutter.click_input()
     # shutter.EOS5DMarkIV.print_control_identifiers()
 
-    send_keys('{UP}{ENTER}', with_spaces=True)
+    # send_keys('{UP}{ENTER}', with_spaces=True)
     # shutter.click_input()
+
+    Button.click_input()
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
