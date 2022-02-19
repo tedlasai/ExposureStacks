@@ -28,8 +28,8 @@ class Camera:
             self.app = Application().start("C:\Program Files (x86)\Canon\EOS Utility\EU3\EOS Utility 3.exe")
             time.sleep(3)
             self.app = Application().connect(title_re="EOS Utility 3.*")
+            time.sleep(3)
 
-        time.sleep(3)
 
         try:  # click 'Remote Shooting' if it shows the top_window
             win = self.app.top_window()
@@ -70,12 +70,7 @@ class Camera:
 
         shoot = self.app.EOS5DMarkIV.child_window(auto_id="takePictureButton",control_type="EOSUtility.TakePictureButton").wrapper_object()  # This magically works too for picture shooting
 
-        time.sleep(6)
         shoot.click()
-        # shoot.move_mouse_input()
-        # shoot.press_mouse_input()
-        # time.sleep(1)
-        # shoot.release_mouse_input()
 
     def Reset_Count(self, mode): # 55 options for shutter speed, 16 options for aperture
 
