@@ -23,6 +23,7 @@ class Camera:
 
         try:  # if app1 is already lunched
             self.app = Application().connect(title_re="EOS Utility 3.*")  # title_re="EOS Utility 3.*"
+            self.app.EOS5DMarkIV.set_focus()
         except:  # if app1 is not launched yet (replace the path)
             self.app = Application().start("C:\Program Files (x86)\Canon\EOS Utility\EU3\EOS Utility 3.exe")
             time.sleep(3)
