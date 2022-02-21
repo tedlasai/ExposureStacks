@@ -31,9 +31,9 @@ class MotorArduino:
     def setPulse(self, high):
         #set direction
         if high:
-            self.board.digital[self.directionPin].write(1)
+            self.board.digital[self.pulsePin].write(1)
         else:
-            self.board.digital[self.directionPin].write(0)
+            self.board.digital[self.pulsePin].write(0)
 
 
     def move(self, pulses, direction = False):
