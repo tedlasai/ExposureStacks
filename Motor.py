@@ -2,7 +2,7 @@ from pyfirmata import Arduino, util
 import time
 import GS_timing as timing
 
-class MotorArduino:
+class Motor:
 
     board = Arduino('COM9')
 
@@ -35,7 +35,6 @@ class MotorArduino:
         else:
             self.board.digital[self.pulsePin].write(0)
 
-
     def move(self, pulses, direction = False):
         self.setDirection(direction)
 
@@ -47,8 +46,8 @@ class MotorArduino:
 
         timing.delay(1000)
 
-motor = MotorArduino(directionPin=6, pulsePin=7, invertDirection=False)
+# motor = Motor(directionPin=6, pulsePin=7, invertDirection=False)
 
-motor.move(8000, True)
-motor.move(8000, False)
+# motor.move(8000, True)
+# motor.move(8000, False)
 

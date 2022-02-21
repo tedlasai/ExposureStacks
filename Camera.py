@@ -3,7 +3,6 @@ import time
 from pywinauto import Application
 from pywinauto.keyboard import send_keys
 
-
 class Camera:
 
     shutter_data = ['30"', '25"', '20"', '15"', '13"', '10"', '8"', '6"', '5"', '4"', '3"2', '2"5', '2"',
@@ -49,10 +48,14 @@ class Camera:
 
         shutter.click_input()
 
-        for i in range(shutter_speed_number):
+        for i in range(0, shutter_speed_number):
+            print("sn is", i)
+            # send_keys('{DOWN}', with_spaces=True)
             send_keys('{DOWN}', with_spaces=True)
 
+        time.sleep(5)
         send_keys('{ENTER}', with_spaces=True)
+        time.sleep(5)
 
     def set_aperture(self, aperture_number):
 
@@ -63,29 +66,37 @@ class Camera:
         aperture.click_input()
 
         for i in range(aperture_number):
+            print("an is", i)
             send_keys('{DOWN}', with_spaces=True)
 
+
+        time.sleep(5)
         send_keys('{ENTER}', with_spaces=True)
+        time.sleep(5)
 
     def shoot_picture(self, shutter_speed_number, aperture_number):
 
-        self.set_shutterSpeed(shutter_speed_number)
+        self.set_shutter_speed(shutter_speed_number)
         self.set_aperture(aperture_number)
 
         shoot = self.app.EOS5DMarkIV.child_window(auto_id="takePictureButton",control_type="EOSUtility.TakePictureButton").wrapper_object()  # This magically works too for picture shooting
 
         shoot.click()
 
+        time.sleep(10)
+
     def reset_count(self, mode): # 55 options for shutter speed, 16 options for aperture
 
         if mode == "aperture":
 
-            aperture = self.app.EOS5DMarkIV.child_windowchild_window(auto_id="olcAv",control_type="EOSUtility.OLCAv").wrapper_object()  # Aperture
+            aperture = self.app.EOS5DMarkIV.child_window(auto_id="olcAv",control_type="EOSUtility.OLCAv").wrapper_object()  # Aperture
 
             aperture.click_input()
 
             for i in range(16):
                 send_keys('{UP}', with_spaces=True)
+
+            time.sleep(5)
             send_keys('{ENTER}', with_spaces=True)
 
         else:
@@ -96,7 +107,13 @@ class Camera:
 
             for i in range(55):
                 send_keys('{UP}', with_spaces=True)
+
+            print("reset done")
+            time.sleep(5)
             send_keys('{ENTER}', with_spaces=True)
+            time.sleep(5)
+
+
 
     def get_shutter_number(self, shutter_name):
 
@@ -111,8 +128,8 @@ class Camera:
         return a_index
 
 
-Camera1 = Camera()
+# Camera1 = Camera()
 
-Camera1.shoot_picture(0,4)
+# Camera1.shoot_picture(3,0)
 
 
