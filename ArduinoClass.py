@@ -6,43 +6,49 @@ class MotorArduino:
 
     board = Arduino('COM9')
 
-    def __init__(self):
-        pass
+    def __init__(self, directionPin, pulsePin, invertDirection = False):
+        self.directionPin = directionPin
+        self.pulsePin = pulsePin
+        self.invertDirection = invertDirection
 
-    def move_to_power(self, revolutions):
+    #direction is boolean because it can only be forward or backward
+    #True is 1, False is 0
+    def setDirection(self, direction):
+        #set direction
+        if self.invertDirection: #invert controls
+            if direction:
+                self.board.digital[self.directionPin].write(0)
+            else:
+                self.board.digital[self.directionPin].write(1)
+        else: #normal controls
+            if direction:
+                self.board.digital[self.directionPin].write(1)
+            else:
+                self.board.digital[self.directionPin].write(0)
 
-        num_revolutions = revolutions * 400
+    #direction is boolean because it can only be high or low
+    #High is True, Low is False
+    def setPulse(self, high):
+        #set direction
+        if high:
+            self.board.digital[self.directionPin].write(1)
+        else:
+            self.board.digital[self.directionPin].write(0)
 
-        self.board.digital[7].write(1)
-        self.board.digital[6].write(1) #moves to power
 
-        for i in range(num_revolutions):  # 400 pulses per revolution. range (x) / 400 is the number of revolutions
+    def move(self, pulses, direction = False):
+        self.setDirection(direction)
 
-            self.board.digital[7].write(0)
+        for i in range(pulses):  # 400 pulses per revolution. range (x) / 400 is the number of revolutions
+            self.setPulse(False)
             timing.delayMicroseconds(500)
-            self.board.digital[7].write(1)
+            self.setPulse(True)
             timing.delayMicroseconds(20)
 
-        timing.delay(2000)
+        timing.delay(1000)
 
-    def move_to_edge(self, revolutions):
+motor = MotorArduino(directionPin=6, pulsePin=7, invertDirection=False)
 
-        num_revolutions = revolutions * 400
-
-        self.board.digital[6].write(0) #moves to edge
-
-        for i in range(num_revolutions):
-
-            self.board.digital[7].write(0)
-            timing.delayMicroseconds(500)
-
-            self.board.digital[7].write(1)
-            timing.delayMicroseconds(10)
-
-        timing.delay(2000)
-
-motor = MotorArduino()
-
-motor.move_to_power(4)
-motor.move_to_edge(4)
+motor.move(8000, True)
+motor.move(8000, False)
 
