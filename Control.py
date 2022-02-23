@@ -5,7 +5,7 @@ from pyfirmata import Arduino, util
 import time
 import GS_timing as timing
 import Camera
-import Motor
+#import Motor
 
 
 def main():
@@ -15,32 +15,34 @@ def main():
     aperture_code = 0
     # unique_shot(shutter_name, aperture_name)
 
-    all_combo(shutter_code, aperture_code)
+    all_combo(shutter_settings = ['8"', '4"', '2"', '1', '0"5', '1/4', '1/8', '1/15', '1/30', '1/60', '1/125', '1/250', '1/500', '1/1000',
+                    '1/2000',  '1/4000', '1/8000'])
 
 def unique_shot(shutter_name, aperture_name):
     pass
 
-def all_combo(shutter_code, aperture_code):
+def all_combo(shutter_settings, aperture_name = 'F8.0'):
 
     camera1 = Camera.Camera()
-    motor1 = Motor.Motor(directionPin=6, pulsePin=7, invertDirection=False)
-    aperture_name = 'F8.0'
+   # motor1 = Motor.Motor(directionPin=6, pulsePin=7, invertDirection=False)
+    #aperture_name = 'F8.0'
     aperture_number = camera1.get_aperture_number(aperture_name)
+
+    camera1.set_aperture(aperture_number)
 
     for j in range(5):
 
-        motor1.move(1000, False)
+       # motor1.move(1000, False)
 
-        for i in camera1.shutter_data:
+        for i in shutter_settings:
 
             print(i)
 
             shutter_number = camera1.get_shutter_number(i)
-            camera1.shoot_picture(shutter_number, aperture_number)
+            camera1.shoot_picture_with_set_aperature(shutter_number, )
 
-            sleep_time = camera1.return_sleep_time(i)
 
-            time.sleep(sleep_time+1)
+
 
 if __name__ == '__main__':
     main()

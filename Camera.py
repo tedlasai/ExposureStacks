@@ -3,8 +3,11 @@ import time
 from pywinauto import Application
 from pywinauto.keyboard import send_keys
 from fractions import Fraction
+import GS_timing as timing
+
 
 class Camera:
+    sleepAperatureAndExposureChange = 500#ms
 
     # shutter is the time taken for each exposure; 30" is 30 seconds, 0"8 is 0.8 seconds, 1/20 is 1/20th of a second
     shutter_data = ['30"', '25"', '20"', '15"', '13"', '10"', '8"', '6"', '5"', '4"', '3"2', '2"5', '2"',
@@ -56,9 +59,10 @@ class Camera:
             # send_keys('{DOWN}', with_spaces=True)
             send_keys('{DOWN}', with_spaces=True)
 
-        time.sleep(5)
+        timing.delay(Camera.sleepAperatureAndExposureChange)
         send_keys('{ENTER}', with_spaces=True)
-        time.sleep(5)
+        timing.delay(Camera.sleepAperatureAndExposureChange)
+
 
     def set_aperture(self, aperture_number):
 
@@ -73,9 +77,9 @@ class Camera:
             send_keys('{DOWN}', with_spaces=True)
 
 
-        time.sleep(5)
+        timing.delay(Camera.sleepAperatureAndExposureChange)
         send_keys('{ENTER}', with_spaces=True)
-        time.sleep(5)
+        timing.delay(Camera.sleepAperatureAndExposureChange)
 
     def shoot_picture(self, shutter_speed_number, aperture_number):
 
@@ -86,7 +90,21 @@ class Camera:
 
         shoot.click()
 
-        time.sleep(10)
+        #change sleep time depending on shutter speed time
+        sleep_time = self.return_sleep_time(Camera.shutter_data[shutter_speed_number])
+        timing.delay((sleep_time + 5)*1000)
+
+    def shoot_picture_with_set_aperature(self, shutter_speed_number):
+
+        self.set_shutter_speed(shutter_speed_number)
+
+        shoot = self.app.EOS5DMarkIV.child_window(auto_id="takePictureButton",control_type="EOSUtility.TakePictureButton").wrapper_object()  # This magically works too for picture shooting
+
+        shoot.click()
+
+        #change sleep time depending on shutter speed time
+        sleep_time = self.return_sleep_time(Camera.shutter_data[shutter_speed_number])
+        timing.delay((sleep_time + 5)*1000)
 
     def reset_count(self, mode): # 55 options for shutter speed, 16 options for aperture
 
@@ -99,7 +117,7 @@ class Camera:
             for i in range(16):
                 send_keys('{UP}', with_spaces=True)
 
-            time.sleep(5)
+            timing.delay(Camera.sleepAperatureAndExposureChange)
             send_keys('{ENTER}', with_spaces=True)
 
         else:
@@ -112,9 +130,9 @@ class Camera:
                 send_keys('{UP}', with_spaces=True)
 
             print("reset done")
-            time.sleep(5)
+            timing.delay(Camera.sleepAperatureAndExposureChange)
             send_keys('{ENTER}', with_spaces=True)
-            time.sleep(5)
+            timing.delay(Camera.sleepAperatureAndExposureChange)
 
     def get_shutter_number(self, shutter_name):
 
@@ -143,8 +161,5 @@ class Camera:
         return a_index
 
 
-Camera1 = Camera()
-
-Camera1.shoot_picture(3,0)
 
 
