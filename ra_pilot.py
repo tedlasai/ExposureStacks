@@ -10,11 +10,11 @@ program = '.*EOS 5D.*'
 def main():
     # app1 = Application().connect(path="C:\Program Files (x86)\Canon\EOS Utility\EU3\EOS Utility 3.exe")
     try:  # if app1 is already lunched
-        app1 = Application().connect(title_re="EOS Utility 3.*")  #title_re="EOS Utility 3.*"
+        app1 = Application().connect(title_re="EOS Utility 3.*", found_index=0)  #title_re="EOS Utility 3.*"
     except:  # if app1 is not lunched yet (replace the path)
         app1 = Application().start("C:\Program Files (x86)\Canon\EOS Utility\EU3\EOS Utility 3.exe")
         time.sleep(3)
-        app1 = Application().connect(title_re="EOS Utility 3.*")
+        app1 = Application().connect(title_re="EOS Utility 3.*", found_index=0)
 
     time.sleep(3)
     try:  # click 'Remote Shooting' if it shows the top_window

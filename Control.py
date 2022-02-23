@@ -34,11 +34,13 @@ def all_combo(shutter_code, aperture_code):
         for i in camera1.shutter_data:
 
             print(i)
-            shutter_number = camera1.get_shutter_number(i)
 
+            shutter_number = camera1.get_shutter_number(i)
             camera1.shoot_picture(shutter_number, aperture_number)
 
-            time.sleep(60)
+            sleep_time = camera1.return_sleep_time(i)
+
+            time.sleep(sleep_time+1)
 
 if __name__ == '__main__':
     main()

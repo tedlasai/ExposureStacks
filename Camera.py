@@ -2,15 +2,18 @@ import time
 
 from pywinauto import Application
 from pywinauto.keyboard import send_keys
+from fractions import Fraction
 
 class Camera:
 
+    # shutter is the time taken for each exposure; 30" is 30 seconds, 0"8 is 0.8 seconds, 1/20 is 1/20th of a second
     shutter_data = ['30"', '25"', '20"', '15"', '13"', '10"', '8"', '6"', '5"', '4"', '3"2', '2"5', '2"',
                     '1"6', '1"3', '1', '0"8', '0"6', '0"5', '0"4', '0"3', '1/4', '1/5', '1/6', '1/8', '1/10',
                     '1/13', '1/15', '1/20', '1/25', '1/30', '1/40', '1/50', '1/60', '1/80', '1/100', '1/125',
                     '1/160', '1/200', '1/250', '1/320', '1/400', '1/500', '1/640', '1/800', '1/1000',
                     '1/1250', '1/1600', '1/2000', '1/2500', '1/3200', '1/4000', '1/5000', '1/6400', '1/8000']
 
+    # quite honestly im still lost how aperture works, aside from the camera's 'pupils' definitions - raj
     aperture_data = ['F4.0', 'F4.5', 'F5.0', 'F5.6', 'F6.3', 'F7.1', 'F8.0', 'F9.0', 'F10', 'F11', 'F13', 'F14',
                      'F16', 'F18', 'F20', 'F22']
 
@@ -21,12 +24,12 @@ class Camera:
     def start_app(self):
 
         try:  # if app1 is already lunched
-            self.app = Application().connect(title_re="EOS Utility 3.*")  # title_re="EOS Utility 3.*"
+            self.app = Application().connect(title_re="EOS Utility 3.*", found_index=0)  # title_re="EOS Utility 3.*"
             self.app.EOS5DMarkIV.set_focus()
         except:  # if app1 is not launched yet (replace the path)
             self.app = Application().start("C:\Program Files (x86)\Canon\EOS Utility\EU3\EOS Utility 3.exe")
             time.sleep(3)
-            self.app = Application().connect(title_re="EOS Utility 3.*")
+            self.app = Application().connect(title_re="EOS Utility 3.*", found_index=0) # added found_index because the firmware update made everything worse
             time.sleep(3)
 
 
@@ -113,13 +116,25 @@ class Camera:
             send_keys('{ENTER}', with_spaces=True)
             time.sleep(5)
 
-
-
     def get_shutter_number(self, shutter_name):
 
         s_index = Camera.shutter_data.index(shutter_name)
 
         return s_index
+
+    def return_sleep_time(self, shutter_speed):
+
+        txt = shutter_speed
+        new = txt.split('"')
+
+        if len(new) == 2:
+            num1 = float(new[0] + '.' + new[1])
+            return num1
+            # time.sleep(num1)
+        else:
+            num2 = float(Fraction(new[0]))
+            return num2
+            # time.sleep(num2)
 
     def get_aperture_number(self, aperture_name):
 
@@ -128,8 +143,8 @@ class Camera:
         return a_index
 
 
-# Camera1 = Camera()
+Camera1 = Camera()
 
-# Camera1.shoot_picture(3,0)
+Camera1.shoot_picture(3,0)
 
 
