@@ -5,7 +5,7 @@ from pyfirmata import Arduino, util
 import time
 import GS_timing as timing
 import Camera
-#import Motor
+import Motor
 
 
 def main():
@@ -24,7 +24,7 @@ def unique_shot(shutter_name, aperture_name):
 def all_combo(shutter_settings, aperture_name = 'F8.0'):
 
     camera1 = Camera.Camera()
-   # motor1 = Motor.Motor(directionPin=6, pulsePin=7, invertDirection=False)
+    motor1 = Motor.Motor(directionPin=6, pulsePin=7, invertDirection=False)
     #aperture_name = 'F8.0'
     aperture_number = camera1.get_aperture_number(aperture_name)
 
@@ -32,7 +32,7 @@ def all_combo(shutter_settings, aperture_name = 'F8.0'):
 
     for j in range(5):
 
-       # motor1.move(1000, False)
+        motor1.move(1000, False)
 
         for i in shutter_settings:
 

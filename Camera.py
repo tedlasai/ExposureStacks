@@ -23,6 +23,9 @@ class Camera:
     def __init__(self):
 
         self.start_app()
+        self.reset_count("aperture")
+        self.reset_count("shutter speed")
+
 
     def start_app(self):
 
@@ -48,16 +51,20 @@ class Camera:
 
     def set_shutter_speed(self, shutter_speed_number):
 
-        Camera.reset_count(self, "shutter")
-
         shutter = self.app.EOS5DMarkIV.child_window(auto_id="olcTv", control_type="EOSUtility.OLCTv").wrapper_object() # Shutter Speed
 
         shutter.click_input()
 
-        for i in range(0, shutter_speed_number):
-            print("sn is", i)
-            # send_keys('{DOWN}', with_spaces=True)
-            send_keys('{DOWN}', with_spaces=True)
+
+        difference = self.shutter_speed_state - shutter_speed_number
+        print("CURRENT", self.shutter_speed_state, "WHAT WE WANT", shutter_speed_number, "DIFFERENCE", difference)
+        if (difference < 0):
+            for i in range(abs(difference)):
+                send_keys('{DOWN}', with_spaces=True)
+        elif (difference > 0):
+            for i in range(difference):
+                send_keys('{UP}', with_spaces=True)
+        self.shutter_speed_state = shutter_speed_number
 
         timing.delay(Camera.sleepAperatureAndExposureChange)
         send_keys('{ENTER}', with_spaces=True)
@@ -66,16 +73,19 @@ class Camera:
 
     def set_aperture(self, aperture_number):
 
-        Camera.reset_count(self, "aperture")
 
         aperture = self.app.EOS5DMarkIV.child_window(auto_id="olcAv",control_type="EOSUtility.OLCAv").wrapper_object() # Aperture
 
         aperture.click_input()
 
-        for i in range(aperture_number):
-            print("an is", i)
-            send_keys('{DOWN}', with_spaces=True)
-
+        difference = self.aperature_state - aperture_number
+        if(difference < 0):
+            for i in range(abs(difference)):
+                send_keys('{DOWN}', with_spaces=True)
+        elif(difference > 0):
+            for i in range(difference):
+                send_keys('{UP}', with_spaces=True)
+        self.aperature_state = aperture_number
 
         timing.delay(Camera.sleepAperatureAndExposureChange)
         send_keys('{ENTER}', with_spaces=True)
@@ -119,6 +129,8 @@ class Camera:
 
             timing.delay(Camera.sleepAperatureAndExposureChange)
             send_keys('{ENTER}', with_spaces=True)
+            timing.delay(Camera.sleepAperatureAndExposureChange)
+            self.aperature_state = 0
 
         else:
 
@@ -133,6 +145,9 @@ class Camera:
             timing.delay(Camera.sleepAperatureAndExposureChange)
             send_keys('{ENTER}', with_spaces=True)
             timing.delay(Camera.sleepAperatureAndExposureChange)
+            self.shutter_speed_state = 0
+
+
 
     def get_shutter_number(self, shutter_name):
 

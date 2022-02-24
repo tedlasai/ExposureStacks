@@ -4,7 +4,7 @@ import GS_timing as timing
 
 class Motor:
 
-    board = Arduino('COM9')
+    board = Arduino('COM3')
 
     def __init__(self, directionPin, pulsePin, invertDirection = False):
         self.directionPin = directionPin
