@@ -46,8 +46,21 @@ class Motor:
 
         timing.delay(1000)
 
-# motor = Motor(directionPin=6, pulsePin=7, invertDirection=False)
+    def moveCm(self, centimeters, direction = False):
+        pulses = int(centimeters * 32400/47)
+        self.move(pulses, direction)
 
-# motor.move(8000, True)
-# motor.move(8000, False)
+        timing.delay(1000)
+
+motor = Motor(directionPin=6, pulsePin=7, invertDirection=False)
+
+# add function for centimeters
+
+# motor.move(32400, True) # 24000 + 4000 + 2000 + 1000 + 1000 + 400 = 32400 for a single trip, 47 cm
+motor.moveCm(20, True) # True -> to the power source
+# motor.moveCm(20, False) # False -> to the edge
+
+#setup scene
+#setup another motor
+#start figuring out display code for datasets(Abdullah's old code)
 
