@@ -64,3 +64,4 @@ motor.moveCm(20, True) # True -> to the power source
 #setup another motor
 #start figuring out display code for datasets(Abdullah's old code)
 
+# https://www.eecs.yorku.ca/~abuolaim/eccv_2018_autofocus/supplemental_materials/supplemental_materials.html#dataBrowser
