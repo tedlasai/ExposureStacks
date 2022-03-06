@@ -21,14 +21,16 @@ def main():
 def unique_shot(shutter_name, aperture_name):
     pass
 
-def all_combo(shutter_settings, aperture_name = 'F8.0'):
+def all_combo(shutter_settings, aperture_name = 'F8.0', iso_name = '125'):
 
     camera1 = Camera.Camera()
-    motor1 = Motor.Motor(directionPin=6, pulsePin=7, invertDirection=False)
+    motor1 = Motor.Motor(directionPin=6, pulsePin=7, cmToPulses= 32400/47 , invertDirection=False)
     #aperture_name = 'F8.0'
     aperture_number = camera1.get_aperture_number(aperture_name)
-
+    iso_number = camera1.get_iso_number(iso_name)
+    print(aperture_number, iso_number)
     camera1.set_aperture(aperture_number)
+    camera1.set_iso(iso_number)
 
     for j in range(5):
 

@@ -6,10 +6,12 @@ class Motor:
 
     board = Arduino('COM3')
 
-    def __init__(self, directionPin, pulsePin, invertDirection = False):
+    def __init__(self, directionPin, pulsePin, cmToPulses,  invertDirection = False):
         self.directionPin = directionPin
         self.pulsePin = pulsePin
         self.invertDirection = invertDirection
+        self.cmToPulses = cmToPulses
+
 
     #direction is boolean because it can only be forward or backward
     #True is 1, False is 0
@@ -47,21 +49,21 @@ class Motor:
         timing.delay(1000)
 
     def moveCm(self, centimeters, direction = False):
-        pulses = int(centimeters * 32400/47)
+        pulses = int(centimeters * self.cmToPulses)
         self.move(pulses, direction)
 
         timing.delay(1000)
 
-motor = Motor(directionPin=6, pulsePin=7, invertDirection=False)
+# motor = Motor(directionPin=6, pulsePin=7, cmToPulses= 32400/47 ,invertDirection=False)
+# motor2 = Motor(directionPin=3, pulsePin=4, cmToPulses= 124444/19, invertDirection=True) #28000/4.5
 
 # add function for centimeters
 
-# motor.move(32400, True) # 24000 + 4000 + 2000 + 1000 + 1000 + 400 = 32400 for a single trip, 47 cm
-motor.moveCm(20, True) # True -> to the power source
-# motor.moveCm(20, False) # False -> to the edge
+# 24000 + 4000 + 2000 + 1000 + 1000 + 400 = 32400 for a single trip, 47 cm
+# motor2.moveCm(20, True) # True -> to the power source 29.5 mark to 25, 4.5 cm difference for 40
+# motor.moveCm(5, False) # False -> to the edge
 
-#setup scene
 #setup another motor
 #start figuring out display code for datasets(Abdullah's old code)
-
-# https://www.eecs.yorku.ca/~abuolaim/eccv_2018_autofocus/supplemental_materials/supplemental_materials.html#dataBrowser
+#set up ISO
+# https://www.eecs.yorku.ca/~abuolaim/ eccv_2018_autofocus/supplemental_materials/supplemental_materials.html#dataBrowser
