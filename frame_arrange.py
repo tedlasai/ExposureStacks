@@ -30,7 +30,7 @@ folder_iterations = math.ceil(len(df) / 12)
 start = 0
 for i in range(0, folder_iterations):
 
-    fold_path = path + '\\' + 'Frame ' + str(i + 1)
+    fold_path = path + '\\' + 'Frame_' + str(i + 1)
     os.makedirs(fold_path)
 
     while start < (i + 1) * 12:
@@ -46,12 +46,12 @@ for i in range(0, folder_iterations):
         index = img.list_all().index('exposure_time')
         exp_time = str(round(float(img.get(img.list_all()[index])), 3))
 
-        new_file_path = fold_path + '\\' + 'Frame ' + str(i + 1) + ' Shutter Value ' + str(exp_time) + '.jpg'
+        new_file_path = fold_path + '\\' + 'Frame_' + str(i + 1) + '_Shutter_Value_' + str(exp_time) + '.jpg'
         os.rename(sorted_file_path, new_file_path)
 
         file_name = df.iloc[start][0][:-4]
         cr2_file = path + '\\' + file_name + '.CR2'
-        new_cr2_file_path = fold_path + '\\' + 'Frame ' + str(i + 1) + ' Shutter Value ' + str(exp_time) + '.CR2'
+        new_cr2_file_path = fold_path + '\\' + 'Frame_' + str(i + 1) + '_Shutter_Value_' + str(exp_time) + '.CR2'
         os.rename(cr2_file, new_cr2_file_path)
 
         start = start + 1
