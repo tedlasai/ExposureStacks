@@ -4,12 +4,14 @@ import GS_timing as timing
 
 class Motor:
 
-    board = Arduino('COM9')
+    board = Arduino('COM3')
 
-    def __init__(self, directionPin, pulsePin, invertDirection = False):
+    def __init__(self, directionPin, pulsePin, cmToPulses,  invertDirection = False):
         self.directionPin = directionPin
         self.pulsePin = pulsePin
         self.invertDirection = invertDirection
+        self.cmToPulses = cmToPulses
+
 
     #direction is boolean because it can only be forward or backward
     #True is 1, False is 0
@@ -46,8 +48,22 @@ class Motor:
 
         timing.delay(1000)
 
-# motor = Motor(directionPin=6, pulsePin=7, invertDirection=False)
+    def moveCm(self, centimeters, direction = False):
+        pulses = int(centimeters * self.cmToPulses)
+        self.move(pulses, direction)
 
-# motor.move(8000, True)
-# motor.move(8000, False)
+        timing.delay(1000)
 
+# motor = Motor(directionPin=6, pulsePin=7, cmToPulses= 32400/47 ,invertDirection=False)
+# motor2 = Motor(directionPin=3, pulsePin=4, cmToPulses= 124444/19, invertDirection=True) #28000/4.5
+
+# add function for centimeters
+
+# 24000 + 4000 + 2000 + 1000 + 1000 + 400 = 32400 for a single trip, 47 cm
+# motor2.moveCm(20, True) # True -> to the power source 29.5 mark to 25, 4.5 cm difference for 40
+# motor.moveCm(5, False) # False -> to the edge
+
+#setup another motor
+#start figuring out display code for datasets(Abdullah's old code)
+#set up ISO
+# https://www.eecs.yorku.ca/~abuolaim/ eccv_2018_autofocus/supplemental_materials/supplemental_materials.html#dataBrowser
