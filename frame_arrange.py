@@ -5,15 +5,22 @@ import math
 from sys import exit
 from exif import Image
 import time
+import platform
 
-path = r"D:\Movies\IMG6"
+path = r"/Users/saitedla/OneDrive - York University/School/York/Lab/ExposureData/ColorfulSceneSmall"
+
+joinPathChar = "/"
+if(platform.system() == "Windows"):
+    joinPathChar = "\\"
+
 
 os.chdir(path)
-my_files = glob.glob('*.jpg')
+my_files = glob.glob('*.JPG') #i changed this to JPG for mac, it might need to be changed back to jpg for windows
+
 print(my_files)
 tsp = []
 for i in range(0, len(my_files)):
-    join = path + '\\' + my_files[i]
+    join = path + joinPathChar + my_files[i]
     with open(join, 'rb') as img_file:
         img = Image(img_file)
         index = img.list_all().index('datetime_digitized')
@@ -30,13 +37,14 @@ folder_iterations = math.ceil(len(df) / 12)
 start = 0
 for i in range(0, folder_iterations):
 
-    fold_path = path + '\\' + 'Frame_' + str(i + 1)
+    folderNum = "{:0>2d}".format(i+1)
+    fold_path = path + joinPathChar + 'Frame_' + folderNum
     os.makedirs(fold_path)
 
     while start < (i + 1) * 12:
 
         try:
-            sorted_file_path = path + '\\' + df.iloc[start][0]
+            sorted_file_path = path + joinPathChar + df.iloc[start][0]
         except:
             exit()
 
@@ -44,14 +52,16 @@ for i in range(0, folder_iterations):
             img = Image(img_file)
 
         index = img.list_all().index('exposure_time')
-        exp_time = str(round(float(img.get(img.list_all()[index])), 3))
+        exp_time = round(float(img.get(img.list_all()[index])), 3)
 
-        new_file_path = fold_path + '\\' + 'Frame_' + str(i + 1) + '_Shutter_Value_' + str(exp_time) + '.jpg'
+        exp_time = "{:06.3f}".format(exp_time)
+
+        new_file_path = fold_path + joinPathChar + 'Frame_' + folderNum + '_Shutter_Value_' + str(exp_time) + '.jpg'
         os.rename(sorted_file_path, new_file_path)
 
         file_name = df.iloc[start][0][:-4]
-        cr2_file = path + '\\' + file_name + '.CR2'
-        new_cr2_file_path = fold_path + '\\' + 'Frame_' + str(i + 1) + '_Shutter_Value_' + str(exp_time) + '.CR2'
+        cr2_file = path + joinPathChar + file_name + '.CR2'
+        new_cr2_file_path = fold_path + joinPathChar + 'Frame_' + folderNum + '_Shutter_Value_' + str(exp_time) + '.CR2'
         os.rename(cr2_file, new_cr2_file_path)
 
         start = start + 1
