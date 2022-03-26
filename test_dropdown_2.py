@@ -12,6 +12,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import cv2
+import Control2 as control
 
 
 aperture_data = ['F4.0', 'F4.5', 'F5.0', 'F5.6', 'F6.3', 'F7.1', 'F8.0', 'F9.0', 'F10', 'F11', 'F13', 'F14','F16', 'F18', 'F20', 'F22']
@@ -24,10 +25,7 @@ shutter_data = ['30"', '25"', '20"', '15"', '13"', '10"', '8"', '6"', '5"', '4"'
                     '1/160', '1/200', '1/250', '1/320', '1/400', '1/500', '1/640', '1/800', '1/1000',
                     '1/1250', '1/1600', '1/2000', '1/2500', '1/3200', '1/4000', '1/5000', '1/6400', '1/8000']
 
-shutter_list = []
-iso_v = ''
-aperture_v = ''
-final_list = []
+
 
 class Example(QWidget):
 
@@ -36,15 +34,19 @@ class Example(QWidget):
 
 		self.initUI()
 
+		self.shutter_list = ['30"']
+		self.iso_v = 'AUTO'
+		self.aperture_v = 'F4.0'
+
 		# self.check_box_combo
 
 	def initUI(self):
 
-		ap_button = self.set_ap_button()
-		iso_button = self.set_iso_button()
+		self.ap_button = self.set_ap_button()
+		self.iso_button = self.set_iso_button()
 
-		self.click_ap(ap_button)
-		self.click_iso(iso_button)
+		self.click_ap(self.ap_button)
+		self.click_iso(self.iso_button)
 
 		self.shutter_button = CheckableComboBox()
 		self.shutter_button.setFixedWidth(150)
@@ -56,15 +58,12 @@ class Example(QWidget):
 
 		start_button = self.set_start_button()
 		stop_button = self.set_stop_button(start_button)
-		enter_button = self.set_enter_button()
-		enter_button.clicked.connect(self.getValue)
 
-		clear_shutter_list = self.clear_list()
-		clear_shutter_list.clicked.connect(self.clean)
+
 
 		start_button.clicked.connect(self.runp)
 
-		horizontal_adjust = self.set_hbox(ap_button, iso_button, self.shutter_button, enter_button, clear_shutter_list)
+		horizontal_adjust = self.set_hbox(self.ap_button, self.iso_button, self.shutter_button)
 
 		vbox = QVBoxLayout()
 		vbox.addLayout(horizontal_adjust)
@@ -86,6 +85,8 @@ class Example(QWidget):
 		self.setWindowTitle('Exposure Stacks')
 		self.show()
 
+		self.control = None
+
 	def ImageUpdateSlot(self, Image):
 
 		self.FeedLabel.setPixmap(QPixmap.fromImage(Image))
@@ -96,21 +97,40 @@ class Example(QWidget):
 
 	def runp(self):
 
-		global final_list
+		self.setShutterList()
 
-		final_list = [0, 1, 2]
+		print(self.shutter_list, self.aperture_v, self.iso_v)
 
-		final_list[0] = shutter_list
-		final_list[1] = aperture_v
-		final_list[2] = iso_v
+		self.control = control.Control(self.shutter_list, self.aperture_v, self.iso_v) #pass in motor step size(cm) for motor1 and 2
 
-		print(final_list)
+
+		#On the view
+		#Include options to control motor cm, and direction
+		#include number slider to control how many stacks to take
+		#camera view
+		#press a button to move the motors left and right
+		#recalculate cm constants
+
+		#write out a simple file containing
+		#shutter_list, aperature_v, iso_v
+		#the time the capture started
+		#motor movement for motor 1 and 2
+		#Number of steps
+
+
+		for i in range(50):
+			self.control.motorMoveStep()
+			#self.camera.takePicture update THe view
+			self.control.captureStack()
+
+
+
+
 
 	def clean(self):
 
-		global shutter_list
 		# print("is it running?")
-		shutter_list = []
+		self.shutter_list = []
 		# print(shutter_list)
 
 	def click_ap(self, ap_button):
@@ -131,15 +151,11 @@ class Example(QWidget):
 
 	def ap_onSelected(self, ap):
 
-		global aperture_v
-		aperture_v = ap
-		print(aperture_v)
+		self.aperture_v = ap
 
 	def iso_onSelected(self, iso):
 
-		global iso_v
-		iso_v = iso
-		print(iso_v)
+		self.iso_v = iso
 
 	def set_ap_button(self):
 
@@ -159,16 +175,13 @@ class Example(QWidget):
 
 		return combobox3
 
-	def set_hbox(self, ap_button, iso_button, shutter_button, enter_button, clear_shutter_list):
+	def set_hbox(self, ap_button, iso_button, shutter_button):
 
 		hbox = QHBoxLayout()
 		hbox.addStretch(1)
 		hbox.addWidget(ap_button)
 		hbox.addWidget(iso_button)
 		hbox.addWidget(shutter_button)
-		hbox.addWidget(enter_button)
-		hbox.addWidget(clear_shutter_list)
-
 		return hbox
 
 	def set_start_button(self):
@@ -191,22 +204,22 @@ class Example(QWidget):
 
 	def set_enter_button(self):
 
-		btn3 = QPushButton('Shutter List')
+		btn3 = QPushButton('Set Settings')
 		# btn3.clicked.connect(self.getValue)
 		btn3.setFixedWidth(150)
 		btn3.setFixedHeight(50)
 
 		return btn3
 
-	def getValue(self):
+	def setShutterList(self):
 
+		self.shutter_list = []
 		for i in range(self.shutter_button.count()):
 
 			if self.shutter_button.itemChecked(i):
-				shutter_list.append(shutter_data[i])
-			# print('Shutter Item: ', shutter_data[i], ' is selected')
+				self.shutter_list.append(shutter_data[i])
 
-		print(shutter_list)
+		print(self.shutter_list)
 
 class CheckableComboBox(QComboBox):
 
