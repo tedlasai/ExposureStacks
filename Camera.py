@@ -62,7 +62,6 @@ class Camera:
 
 
         difference = self.shutter_speed_state - shutter_speed_number
-        print("SHUTTER CURRENT", self.shutter_speed_state, "WHAT WE WANT", shutter_speed_number, "DIFFERENCE", difference)
         if (difference < 0):
             for i in range(abs(difference)):
                 send_keys('{DOWN}', with_spaces=True)
@@ -102,7 +101,6 @@ class Camera:
         iso.click_input()
 
         difference = self.iso_state - iso_number
-        print("ISO CURRENT", self.iso_state, "WHAT WE WANT", iso_number, "DIFFERENCE", difference)
         if (difference < 0):
             for i in range(abs(difference)):
                 send_keys('{DOWN}', with_spaces=True)

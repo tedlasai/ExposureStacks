@@ -6,57 +6,35 @@ import time
 import GS_timing as timing
 import Camera
 import Motor
-from test_dropdown_2 import final_list
 
-def main():
 
-    # shutter_name = '30"'
-    shutter_code = final_list[0]
-    aperture_code = final_list[1]
-    iso_code = final_list[2]
-    # unique_shot(shutter_name, aperture_name)
+#def main(shutter_code, aperature_code, iso_code):
 
-    all_combo(shutter_code, aperture_code, iso_code)
+ #   all_combo(shutter_code, aperture_code, iso_code)
 
-def unique_shot(shutter_name, aperture_name):
-    pass
+class Control():
 
-def all_combo(shutter_settings, aperture_name, iso_name):
+    def __init__(self, shutter_settings, aperture_name, iso_name):
+        self.shutter_settings = shutter_settings
+        self.aperture_name =aperture_name
+        self.iso_name = iso_name
 
-    camera1 = Camera.Camera()
-    motor1 = Motor.Motor(directionPin=6, pulsePin=7, cmToPulses= 32400/47 , invertDirection=False)
-    #aperture_name = 'F8.0'
-    aperture_number = camera1.get_aperture_number(aperture_name)
-    iso_number = camera1.get_iso_number(iso_name)
-    print(aperture_number, iso_number)
-    camera1.set_aperture(aperture_number)
-    camera1.set_iso(iso_number)
+        self.camera = Camera.Camera()
+        self.motor1 = Motor.Motor(directionPin=6, pulsePin=7, cmToPulses= 32400/47 , invertDirection=False)
 
-    for j in range(5):
+        self.aperture_number = self.camera.get_aperture_number(self.aperture_name)
+        self.iso_number = self.camera.get_iso_number(self.iso_name)
 
-        motor1.move(1000, False)
+        self.camera.set_aperture(self.aperture_number)
+        self.camera.set_iso(self.iso_number)
 
-        for i in shutter_settings:
+    def motorMoveStep(self):
+        self.motor1.move(1000, "toEdge")
 
+
+
+    def captureStack(self):
+        for i in self.shutter_settings:
             print(i)
-
-            shutter_number = camera1.get_shutter_number(i)
-            camera1.shoot_picture_with_set_aperature(shutter_number, )
-
-
-
-
-if __name__ == '__main__':
-    main()
-
-
-    # win1 = app1.window(title_re=".*EOS 5D.*")
-
-    # shutter_speed_number = 2
-    # Aperture_number = 2
-    # mode = "Aperture"
-
-    # ShutterSpeed(shutter_speed_number, app1)
-    # Aperture(Aperture_number, app1)
-    # Shoot_Picture(app1)
-    # Reset_Count(app1, mode)
+            shutter_number = self.camera.get_shutter_number(i)
+            self.camera.shoot_picture_with_set_aperature(shutter_number, )

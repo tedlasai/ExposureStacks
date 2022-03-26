@@ -1,3 +1,4 @@
+
 from pywinauto import Application
 from pywinauto.keyboard import send_keys
 
@@ -15,27 +16,34 @@ def main():
     aperture_code = 0
     # unique_shot(shutter_name, aperture_name)
 
-    all_combo(shutter_settings = ['8"', '4"', '2"', '1', '0"5', '1/4', '1/8', '1/15', '1/30', '1/60', '1/125', '1/250', '1/500', '1/1000',
-                    '1/2000',  '1/4000', '1/8000'])
+    #first test is at aperature F80 and Iso_name = 100, numSteps = 90
+    #second test is apaerate F20.0 and ISo =100,
+
+    all_combo(shutter_settings = ['20"', '15"', '13"', '10"', '6"', '4"', '2"',
+     '1"6', '1', '0"8', '0"5',  '0"3', '1/5', '1/8',  '1/15','1/25', '1/40', '1/60', '1/100',
+     '1/160', '1/250', '1/400', '1/640', '1/1000', '1/1600', '1/2500'])
 
 def unique_shot(shutter_name, aperture_name):
     pass
 
-def all_combo(shutter_settings, aperture_name = 'F8.0', iso_name = '125'):
+
+def all_combo(shutter_settings, aperture_name = 'F20', iso_name = '100'):
 
     camera1 = Camera.Camera()
     motor1 = Motor.Motor(directionPin=6, pulsePin=7, cmToPulses= 32400/47 , invertDirection=False)
-    #aperture_name = 'F8.0'
+    motor2 = Motor.Motor(directionPin=3, pulsePin=4, cmToPulses=124444 / 19, invertDirection=True)  # 28000/4.5
     aperture_number = camera1.get_aperture_number(aperture_name)
     iso_number = camera1.get_iso_number(iso_name)
     print(aperture_number, iso_number)
     camera1.set_aperture(aperture_number)
     camera1.set_iso(iso_number)
 
-    for j in range(5):
+    numSteps = 90
+    for step in range(numSteps):
 
-        motor1.move(1000, False)
-
+        motor1.moveCm(0.4, "toEdge") #max: 40 steps
+        motor2.moveCm(0.4, "toEdge")
+        print(step)
         for i in shutter_settings:
 
             print(i)
@@ -43,14 +51,13 @@ def all_combo(shutter_settings, aperture_name = 'F8.0', iso_name = '125'):
             shutter_number = camera1.get_shutter_number(i)
             camera1.shoot_picture_with_set_aperature(shutter_number, )
 
+main()
 
 
 
-if __name__ == '__main__':
-    main()
-
-
-    # win1 = app1.window(title_re=".*EOS 5D.*")
+    # win1 = app1.windo
+    # if __name__ == '__main__':
+    #     main()w(title_re=".*EOS 5D.*")
 
     # shutter_speed_number = 2
     # Aperture_number = 2
