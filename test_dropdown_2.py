@@ -25,8 +25,6 @@ shutter_data = ['30"', '25"', '20"', '15"', '13"', '10"', '8"', '6"', '5"', '4"'
                     '1/160', '1/200', '1/250', '1/320', '1/400', '1/500', '1/640', '1/800', '1/1000',
                     '1/1250', '1/1600', '1/2000', '1/2500', '1/3200', '1/4000', '1/5000', '1/6400', '1/8000']
 
-
-
 class Example(QWidget):
 
 	def __init__(self):
@@ -38,19 +36,27 @@ class Example(QWidget):
 		self.iso_v = 'AUTO'
 		self.aperture_v = 'F4.0'
 
+		self.m1_direction = 'To the Edge'
+		self.m2_direction = 'To the Edge'
+
 		# self.check_box_combo
 
 	def initUI(self):
 
+
 		self.ap_button = self.set_ap_button()
 		self.iso_button = self.set_iso_button()
+
+		self.stop_move = self.stop_motor_move()
+
 
 		self.click_ap(self.ap_button)
 		self.click_iso(self.iso_button)
 
 		self.shutter_button = CheckableComboBox()
-		self.shutter_button.setFixedWidth(150)
-		self.shutter_button.setFixedHeight(50)
+		self.shutter_button.setFixedWidth(100)
+		self.shutter_button.setFixedHeight(20)
+
 		for i in range(len(shutter_data)):
 			self.shutter_button.addItem(shutter_data[i])
 			# self.combo.addItem('Item {0}'.format(str(i)))
@@ -58,6 +64,29 @@ class Example(QWidget):
 
 		start_button = self.set_start_button()
 		stop_button = self.set_stop_button(start_button)
+
+		self.motor_1_cm = self.set_motor_1_travel()
+
+		# self.m1_cm_value = float(self.motor_1_cm.text())
+
+
+		self.motor_1_direction = self.motor_1_direction()
+
+		self.motor_2_cm = self.set_motor_2_travel()
+
+		try:
+			self.m2_cm_value = int(self.motor_2_cm.text())
+		except ValueError:
+			self.m2_cm_value = 5
+
+		self.motor_2_direction = self.motor_2_direction()
+
+		self.stack_button = self.stacks()
+
+		self.manual_move_1 = self.set_manual_move_m1()
+		self.manual_move_2 = self.set_manual_move_m2()
+
+		self.manual_move_1.clicked.connect(self.move_m1)
 
 
 
@@ -76,6 +105,7 @@ class Example(QWidget):
 		self.FeedLabel = QLabel()
 		horizontal_adjust.addWidget(self.FeedLabel)
 
+
 		self.Worker1 = Worker1()
 		self.Worker1.start()
 		self.Worker1.ImageUpdate.connect(self.ImageUpdateSlot)
@@ -83,9 +113,22 @@ class Example(QWidget):
 
 		self.setGeometry(200, 100, 1550, 850)  # 200, 100, 1550, 850
 		self.setWindowTitle('Exposure Stacks')
+
+
 		self.show()
 
 		self.control = None
+
+
+
+	def move_m1(self):
+
+		self.m1_cm_value = float(self.motor_1_cm.text())
+		self.m1_direction = "To the Edge"
+
+	def m1_dir(self, motor_1_direction):
+
+		motor_1_direction.activated[str].connect(self.ap_onSelected)
 
 	def ImageUpdateSlot(self, Image):
 
@@ -95,6 +138,62 @@ class Example(QWidget):
 
 		self.Worker1.stop()
 
+	def set_motor_1_travel(self):
+
+		mv = QLineEdit(self)
+		mv.setToolTip('This is for the cm the motor travels')
+		mv.setFixedWidth(100)
+		mv.setFixedHeight(20)
+
+		self.label = QLabel("Motor 1 Travel \n Length (cm)", self)
+		self.label.move(50, 500)
+
+		mv.move(50, 530)
+
+		return mv
+
+	def motor_1_direction(self):
+
+		combobox3 = QComboBox(self)
+		combobox3.addItem("To the Edge")
+		combobox3.addItem("To the Power Source")
+		combobox3.setFixedWidth(130)
+		combobox3.setFixedHeight(20)
+		combobox3.move(180, 530)
+
+		self.label = QLabel("Motor 1 Direction", self)
+		self.label.move(180, 500)
+
+		return combobox3
+
+	def set_motor_2_travel(self):
+
+		mv2 = QLineEdit(self)
+		mv2.setToolTip('This is for the cm the motor travels')
+		mv2.setFixedWidth(100)
+		mv2.setFixedHeight(20)
+
+		self.label = QLabel("Motor 2 Travel \n Length (cm)", self)
+		self.label.move(50, 600)
+
+		mv2.move(50, 630)
+
+		return mv2
+
+	def motor_2_direction(self):
+
+		combobox4 = QComboBox(self)
+		combobox4.addItem("To the Edge")
+		combobox4.addItem("To the Power Source")
+		combobox4.setFixedWidth(130)
+		combobox4.setFixedHeight(20)
+		combobox4.move(180, 630)
+
+		self.label = QLabel("Motor 2 Direction", self)
+		self.label.move(180, 600)
+
+		return combobox4
+
 	def runp(self):
 
 		self.setShutterList()
@@ -103,12 +202,11 @@ class Example(QWidget):
 
 		self.control = control.Control(self.shutter_list, self.aperture_v, self.iso_v) #pass in motor step size(cm) for motor1 and 2
 
-
 		#On the view
-		#Include options to control motor cm, and direction
-		#include number slider to control how many stacks to take
+		#Include options to control motor cm, and direction -----------------
+		#include number slider to control how many stacks to take -------------------
 		#camera view
-		#press a button to move the motors left and right
+		#press a button to move the motors left and right -----------------------
 		#recalculate cm constants
 
 		#write out a simple file containing
@@ -123,9 +221,49 @@ class Example(QWidget):
 			#self.camera.takePicture update THe view
 			self.control.captureStack()
 
+	def stacks(self):
+
+		stack = QLineEdit(self)
+		stack.setFixedWidth(100)
+		stack.setFixedHeight(20)
 
 
+		self.label = QLabel("Stacks", self)
+		self.label.move(50, 400)
 
+		stack.move(50, 430)
+
+		return stack
+
+	def set_manual_move_m1(self):
+
+		mm1 = QPushButton('Move', self)
+		mm1.setToolTip('to move Motor 1 manually')
+		mm1.setFixedWidth(100)
+		mm1.setFixedHeight(20)
+		mm1.move(340, 530)
+
+		return mm1
+
+	def set_manual_move_m2(self):
+
+		mm2 = QPushButton('Move', self)
+		mm2.setToolTip('to move Motor 2 manually')
+		mm2.setFixedWidth(100)
+		mm2.setFixedHeight(20)
+		mm2.move(340, 630)
+
+		return mm2
+
+	def stop_motor_move(self):
+
+		mm3 = QPushButton('Stop Move', self)
+		mm3.setToolTip('to move Motor 2 manually')
+		mm3.setFixedWidth(100)
+		mm3.setFixedHeight(30)
+		mm3.move(340, 580)
+
+		return mm3
 
 	def clean(self):
 
@@ -161,8 +299,8 @@ class Example(QWidget):
 
 		combobox2 = QComboBox()
 		combobox2.addItems(aperture_data)
-		combobox2.setFixedWidth(150)
-		combobox2.setFixedHeight(50)
+		combobox2.setFixedWidth(100)
+		combobox2.setFixedHeight(20)
 
 		return combobox2
 
@@ -170,8 +308,8 @@ class Example(QWidget):
 
 		combobox3 = QComboBox()
 		combobox3.addItems(iso_data)
-		combobox3.setFixedWidth(150)
-		combobox3.setFixedHeight(50)
+		combobox3.setFixedWidth(100)
+		combobox3.setFixedHeight(20)
 
 		return combobox3
 
@@ -179,6 +317,7 @@ class Example(QWidget):
 
 		hbox = QHBoxLayout()
 		hbox.addStretch(1)
+
 		hbox.addWidget(ap_button)
 		hbox.addWidget(iso_button)
 		hbox.addWidget(shutter_button)
@@ -269,7 +408,8 @@ class Worker1(QThread):
                 Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 FlippedImage = cv2.flip(Image, 1)
                 ConvertToQtFormat = QImage(FlippedImage.data, FlippedImage.shape[1], FlippedImage.shape[0], QImage.Format_RGB888)
-                Pic = ConvertToQtFormat.scaled(840, 880, Qt.KeepAspectRatio)
+                Pic = ConvertToQtFormat.scaled(540, 580, Qt.KeepAspectRatio)# 840, 880
+
                 self.ImageUpdate.emit(Pic)
 
     def stop(self):
