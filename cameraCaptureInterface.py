@@ -3,8 +3,11 @@
 import sys
 from PyQt5.QtWidgets import (QWidget, QPushButton,
                              QHBoxLayout, QVBoxLayout, QApplication, QComboBox)
-
+from PyQt5ThreadExample import Worker
 import sys
+
+import time
+import traceback, sys
 from PyQt5.QtWidgets import QApplication, QWidget, QComboBox, QPushButton, QVBoxLayout
 from PyQt5.QtCore import Qt
 import sys
@@ -13,8 +16,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import cv2
 import Control2 as control
-import Motor
+from motor import Motor
 import time
+import numpy as np
 
 aperture_data = ['F4.0', 'F4.5', 'F5.0', 'F5.6', 'F6.3', 'F7.1', 'F8.0', 'F9.0', 'F10', 'F11', 'F13', 'F14','F16', 'F18', 'F20', 'F22']
 
@@ -43,8 +47,8 @@ class Example(QWidget):
 		self.m1_cm_value = 0
 		self.m2_cm_value = 0
 
-		#self.motor1 = Motor(directionPin=6, pulsePin=7, cmToPulses=812, invertDirection=False)  # 32400/47
-
+		self.motor1 = Motor(directionPin=6, pulsePin=7, cmToPulses=812, invertDirection=False)  # 32400/47
+		self.motor2 = Motor(directionPin=3, pulsePin=4, cmToPulses= 800, invertDirection=True)
 		# self.check_box_combo
 
 	def initUI(self):
@@ -88,6 +92,7 @@ class Example(QWidget):
 		self.manual_move_2 = self.set_manual_move_m2()
 
 		self.manual_move_1.clicked.connect(self.run_move_m1)
+		self.manual_move_2.clicked.connect(self.run_move_m2)
 
 		self.click_m1_direction(self.motor_1_direction)
 		self.click_m2_direction(self.motor_2_direction)
@@ -109,9 +114,9 @@ class Example(QWidget):
 		horizontal_adjust.addWidget(self.FeedLabel)
 
 
-		self.Worker1 = Worker1()
-		self.Worker1.start()
-		self.Worker1.ImageUpdate.connect(self.ImageUpdateSlot)
+		print("HELLO")
+		#
+
 		self.setLayout(self.VBL)
 
 		self.setGeometry(200, 100, 1550, 850)  # 200, 100, 1550, 850
@@ -127,14 +132,14 @@ class Example(QWidget):
 		self.m1_cm_value = int(self.motor_1_cm.text())
 		print(self.m1_cm_value)
 		print(self.m1_direction)
-		Motor.motor1.moveCm(self.m1_cm_value, self.m1_direction)
+		self.motor1.moveCm(self.m1_cm_value, self.m1_direction)
 
 	def run_move_m2(self):
 
 		self.m2_cm_value = int(self.motor_2_cm.text())
 		print(self.m2_cm_value)
 		print(self.m2_direction)
-		Motor.motor2.moveCm(self.m2_cm_value, self.m2_direction)
+		self.motor2.moveCm(self.m2_cm_value, self.m2_direction)
 
 	def stoph(self):
 
@@ -163,7 +168,6 @@ class Example(QWidget):
 		print(self.m2_direction)
 
 	def ImageUpdateSlot(self, Image):
-
 		self.FeedLabel.setPixmap(QPixmap.fromImage(Image))
 
 	def CancelFeed(self):
@@ -215,7 +219,7 @@ class Example(QWidget):
 	def motor_2_direction(self):
 
 		combobox4 = QComboBox(self)
-		combobox4.addItem("ToEdge")
+		combobox4.addItem("toEdge")
 		combobox4.addItem("toMotor")
 		combobox4.setFixedWidth(130)
 		combobox4.setFixedHeight(20)
@@ -456,28 +460,7 @@ class CheckableComboBox(QComboBox):
         item = self.model().item(index, self.modelColumn())
         return item.checkState() == Qt.Checked
 
-class Worker1(QThread):
 
-    ImageUpdate = pyqtSignal(QImage)
-
-    def run(self):
-
-        self.ThreadActive = True
-        Capture = cv2.VideoCapture(0)
-        while self.ThreadActive:
-            ret, frame = Capture.read()
-            if ret:
-                Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                FlippedImage = cv2.flip(Image, 1)
-                ConvertToQtFormat = QImage(FlippedImage.data, FlippedImage.shape[1], FlippedImage.shape[0], QImage.Format_RGB888)
-                Pic = ConvertToQtFormat.scaled(540, 580, Qt.KeepAspectRatio)# 840, 880
-
-                self.ImageUpdate.emit(Pic)
-
-    def stop(self):
-
-        self.ThreadActive = False
-        self.quit()
 
 
 def main():

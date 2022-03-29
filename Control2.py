@@ -5,7 +5,7 @@ from pyfirmata import Arduino, util
 import time
 import GS_timing as timing
 import Camera
-import Motor
+import motor
 
 
 #def main(shutter_code, aperature_code, iso_code):

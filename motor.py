@@ -63,7 +63,7 @@ class Motor:
 
         timing.delay(1000)
 
-motor1 = Motor(directionPin=6, pulsePin=7, cmToPulses= 812 ,invertDirection=False) # 32400/47
+#motor1 = Motor(directionPin=6, pulsePin=7, cmToPulses= 812 ,invertDirection=False) # 32400/47
 #motor2 = Motor(directionPin=3, pulsePin=4, cmToPulses= 124444/19, invertDirection=True) #28000/4.5
 
 # add function for centimeters
