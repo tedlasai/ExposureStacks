@@ -5,9 +5,28 @@ from PyQt5.QtWidgets import (QWidget, QPushButton,
                              QHBoxLayout, QVBoxLayout, QApplication, QComboBox)
 from PyQt5ThreadExample import Worker
 import sys
-
+from PyQt5.QtWidgets import (QWidget, QPushButton,
+                             QHBoxLayout, QVBoxLayout, QApplication, QComboBox)
+from PyQt5.QtWidgets import *
+from PyQt5.QtMultimedia import *
+from PyQt5.QtMultimediaWidgets import *
+from PyQt5.QtGui import QPixmap
+import os
+import glob
+from PyQt5.QtWidgets import QApplication, QWidget, QComboBox, QPushButton, QVBoxLayout
+from PyQt5.QtCore import Qt
+from PyQt5 import QtCore, QtGui, QtWidgets
+import sys
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+import cv2
+import Control2 as control
+import motor
+import time
 import time
 import traceback, sys
+from PyQt5.QtMultimedia import QCameraImageCapture
 from PyQt5.QtWidgets import QApplication, QWidget, QComboBox, QPushButton, QVBoxLayout
 from PyQt5.QtCore import Qt
 import sys
@@ -35,13 +54,13 @@ class Example(QWidget):
 	def __init__(self):
 		super().__init__()
 
-		self.initUI()
+
 
 		self.shutter_list = ['30"']
 		self.iso_v = 'AUTO'
 		self.aperture_v = 'F4.0'
 
-		self.m1_direction = 'toMotor'
+		self.m1_direction = 'toEdge'
 		self.m2_direction = 'toEdge'
 
 		self.m1_cm_value = 0
@@ -49,6 +68,21 @@ class Example(QWidget):
 
 		self.motor1 = Motor(directionPin=6, pulsePin=7, cmToPulses=812, invertDirection=False)  # 32400/47
 		self.motor2 = Motor(directionPin=3, pulsePin=4, cmToPulses= 800, invertDirection=True)
+
+		self.available_cameras = QCameraInfo.availableCameras()
+		if not self.available_cameras:
+			# exit the code
+			sys.exit()
+
+
+		self.save_path = os.path.join(os.path.dirname(__file__), 'Exposures', 'Viewing')
+		self.select_camera(0)
+
+		self.captureView = QCameraImageCapture(self.camera)
+
+		self.runningCapture = False # variable to track if we are running a capture
+
+		self.initUI()
 		# self.check_box_combo
 
 	def initUI(self):
@@ -86,7 +120,8 @@ class Example(QWidget):
 
 		self.motor_2_direction = self.motor_2_direction()
 
-		self.stack_button = self.stacks()
+		self.stack_label = self.stacks()
+		self.dataset_name_label = self.dataset_name_create_button()
 
 		self.manual_move_1 = self.set_manual_move_m1()
 		self.manual_move_2 = self.set_manual_move_m2()
@@ -100,10 +135,11 @@ class Example(QWidget):
 		stop_button.clicked.connect(self.stoph)
 		start_button.clicked.connect(self.runp)
 
-		horizontal_adjust = self.set_hbox(self.ap_button, self.iso_button, self.shutter_button)
+
+		self.horizontal_adjust = self.set_hbox(self.ap_button, self.iso_button, self.shutter_button)
 
 		vbox = QVBoxLayout()
-		vbox.addLayout(horizontal_adjust)
+		vbox.addLayout(self.horizontal_adjust)
 		vbox.addStretch(1)
 
 		self.setLayout(vbox)
@@ -111,8 +147,14 @@ class Example(QWidget):
 		self.VBL = QVBoxLayout()
 
 		self.FeedLabel = QLabel()
-		horizontal_adjust.addWidget(self.FeedLabel)
+		self.horizontal_adjust.addWidget(self.FeedLabel)
 
+		self.click_photo()
+
+		self.labelImage = QLabel(self)
+		self.horizontal_adjust.addWidget(self.labelImage)
+		#self.update_picture()
+		self.captureView.imageSaved.connect(self.update_picture)
 
 		print("HELLO")
 		#
@@ -126,6 +168,79 @@ class Example(QWidget):
 
 		self.control = None
 
+	def display_image(self, init_img):
+
+
+		self.pixmap = QPixmap(init_img)
+		self.pixmap = self.pixmap.scaled(500, 500, QtCore.Qt.KeepAspectRatio, Qt.FastTransformation)
+		self.labelImage.setPixmap(self.pixmap)
+
+		#self.labelImage.move(600, 200)
+
+		self.show()
+
+	def click_photo(self):
+
+		# time stamp
+		timestamp = time.strftime("%d-%b-%Y-%H_%M_%S")
+
+
+		if not self.runningCapture:
+			folderStore = 'Viewing'
+		else:
+			folderStore = self.dataset_name_label.text()
+		# capture the image and save it on the save path
+		captureId = self.captureView.capture(os.path.join(os.path.dirname(__file__), 'Exposures', folderStore,
+										  "%s-%04d-%s.jpg" % (
+											  self.current_camera_name,
+											  self.save_seq,
+											  timestamp
+										  )))
+
+		#while(True):
+			#print("HELLO")
+
+
+		# increment the sequence
+		self.save_seq += 1
+
+
+		QApplication.processEvents()
+
+	def select_camera(self, i):
+
+		# getting the selected camera
+		self.camera = QCamera(self.available_cameras[i])
+
+		# setting view finder to the camera
+		# self.camera.setViewfinder(self.viewfinder)
+
+		# setting capture mode to the camera
+		self.camera.setCaptureMode(QCamera.CaptureStillImage)
+
+		# if any error occur show the alert
+		self.camera.error.connect(lambda: self.alert(self.camera.errorString()))
+
+		# start the camera
+		self.camera.start()
+
+		# creating a QCameraImageCapture object
+		self.captureView = QCameraImageCapture(self.camera)
+
+		# showing alert if error occur
+		self.captureView.error.connect(lambda error_msg, error,
+											  msg: self.alert(msg))
+
+		# when image captured showing message
+		self.captureView.imageCaptured.connect(lambda d,
+													  i: self.status.showMessage("Image captured : "
+																			 + str(self.save_seq)))
+
+		# getting current camera name
+		self.current_camera_name = self.available_cameras[i].description()
+
+		# inital save sequence
+		self.save_seq = 0
 
 	def run_move_m1(self):
 
@@ -133,6 +248,9 @@ class Example(QWidget):
 		print(self.m1_cm_value)
 		print(self.m1_direction)
 		self.motor1.moveCm(self.m1_cm_value, self.m1_direction)
+		self.click_photo()
+		self.update_picture()
+		self.update()  # where self is the name of the window you want to force to update
 
 	def run_move_m2(self):
 
@@ -181,8 +299,8 @@ class Example(QWidget):
 		mv.setFixedWidth(100)
 		mv.setFixedHeight(20)
 
-		self.label = QLabel("Motor 1 Travel \n Length (cm)", self)
-		self.label.move(50, 500)
+		self.numStacks = QLabel("Motor 1 Travel \n Length (cm)", self)
+		self.numStacks.move(50, 500)
 
 		mv.move(50, 530)
 
@@ -197,8 +315,8 @@ class Example(QWidget):
 		combobox3.setFixedHeight(20)
 		combobox3.move(180, 530)
 
-		self.label = QLabel("Motor 1 Direction", self)
-		self.label.move(180, 500)
+		self.numStacks = QLabel("Motor 1 Direction", self)
+		self.numStacks.move(180, 500)
 
 		return combobox3
 
@@ -209,8 +327,8 @@ class Example(QWidget):
 		mv2.setFixedWidth(100)
 		mv2.setFixedHeight(20)
 
-		self.label = QLabel("Motor 2 Travel \n Length (cm)", self)
-		self.label.move(50, 600)
+		self.numStacks = QLabel("Motor 2 Travel \n Length (cm)", self)
+		self.numStacks.move(50, 600)
 
 		mv2.move(50, 630)
 
@@ -225,8 +343,8 @@ class Example(QWidget):
 		combobox4.setFixedHeight(20)
 		combobox4.move(180, 630)
 
-		self.label = QLabel("Motor 2 Direction", self)
-		self.label.move(180, 600)
+		self.numStacks = QLabel("Motor 2 Direction", self)
+		self.numStacks.move(180, 600)
 
 		return combobox4
 
@@ -257,7 +375,7 @@ class Example(QWidget):
 
 
 
-		stack_number = int(self.stack_button.text())
+		stack_number = int(self.stack_label.text())
 		print(stack_number)
 
 		shutter_str = "Shutter List is: " + self.shutter_list + "\n"
@@ -271,14 +389,19 @@ class Example(QWidget):
 		print("running")
 		L = [shutter_str, ap_str, iso_str, start_str, stack_str, m1_str, m2_str]
 
-		f = open("runfile.txt", "a")
+		f = open("runfile.txt", "w")
 		f.writelines(L)
 		f.close()
+		self.runningCapture = True
 
 		for i in range(stack_number):
-			self.control.motor_1_MoveStep()
+			self.run
+			self.control.motor_2_MoveStep()
 			#self.camera.takePicture update the view
 			self.control.captureStack()
+			self.click_photo()
+			self.update_picture()
+		self.runningCapture = False
 
 		end_time = time.time() - start_time
 
@@ -287,19 +410,40 @@ class Example(QWidget):
 		f.close()
 
 
+	def update_picture(self, a = "", b= ""):
+
+
+		print(a,b)
+		files = list(filter(os.path.isfile, glob.glob(self.save_path + "\\*")))
+		files.sort(key=lambda x: os.path.getmtime(x))
+
+
+		self.display_image(files[-1])
+
 	def stacks(self):
 
-		stack = QLineEdit(self)
-		stack.setFixedWidth(100)
-		stack.setFixedHeight(20)
+		numStacks = QLineEdit(self)
+		numStacks.setFixedWidth(100)
+		numStacks.setFixedHeight(20)
 
 
-		self.label = QLabel("Stacks", self)
-		self.label.move(50, 400)
+		
+		self.numStacks = QLabel("Number of Stacks", self)
+		self.numStacks.move(50, 400)
 
-		stack.move(50, 430)
+		numStacks.move(50, 430)
 
-		return stack
+		return numStacks
+
+	def dataset_name_create_button(self):
+		datasetName = QLineEdit(self)
+		datasetName.setFixedWidth(100)
+		datasetName.setFixedHeight(20)
+		datasetName.move(50, 330)
+
+		self.dataset_name = QLabel("DataSetName", self)
+		self.dataset_name.move(50, 300)
+		return datasetName
 
 	def set_manual_move_m1(self):
 
