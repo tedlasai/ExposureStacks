@@ -7,6 +7,7 @@ class Motor:
     board = Arduino('COM3')
 
     def __init__(self, directionPin, pulsePin, cmToPulses,  invertDirection = False):
+
         self.directionPin = directionPin
         self.pulsePin = pulsePin
         self.invertDirection = invertDirection
@@ -56,22 +57,22 @@ class Motor:
 
         timing.delay(1000)
 
-    def moveCm(self, centimeters, direction = False):
+    def moveCm(self, centimeters, direction ):
         pulses = int(centimeters * self.cmToPulses)
         self.move(pulses, direction)
 
         timing.delay(1000)
 
-motor1 = Motor(directionPin=6, pulsePin=7, cmToPulses= 32400/47 ,invertDirection=False)
-motor2 = Motor(directionPin=3, pulsePin=4, cmToPulses= 124444/19, invertDirection=True) #28000/4.5
+motor1 = Motor(directionPin=6, pulsePin=7, cmToPulses= 812 ,invertDirection=False) # 32400/47
+#motor2 = Motor(directionPin=3, pulsePin=4, cmToPulses= 124444/19, invertDirection=True) #28000/4.5
 
 # add function for centimeters
 
 # 24000 + 4000 +
 # 2000 + 1000 + 1000 + 400 = 32400 for a single trip, 47 cm
 # motor1.moveCm(20, True) # True -> to the power source 29.5 mark to 25, 4.5 cm difference for 40
-#motor1.moveCm(30, "toMotor")
-#motor2.moveCm(10, "toMotor")
+# motor1.moveCm(10, "toEdge")
+# motor2.moveCm(10, "toMotor")
 #motor.moveCm(0.4, True) # False -> to the edge
 
 #setup another motor

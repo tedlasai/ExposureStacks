@@ -13,7 +13,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import cv2
 import Control2 as control
-
+import Motor
+import time
 
 aperture_data = ['F4.0', 'F4.5', 'F5.0', 'F5.6', 'F6.3', 'F7.1', 'F8.0', 'F9.0', 'F10', 'F11', 'F13', 'F14','F16', 'F18', 'F20', 'F22']
 
@@ -36,8 +37,13 @@ class Example(QWidget):
 		self.iso_v = 'AUTO'
 		self.aperture_v = 'F4.0'
 
-		self.m1_direction = 'To the Edge'
-		self.m2_direction = 'To the Edge'
+		self.m1_direction = 'toMotor'
+		self.m2_direction = 'toEdge'
+
+		self.m1_cm_value = 0
+		self.m2_cm_value = 0
+
+		#self.motor1 = Motor(directionPin=6, pulsePin=7, cmToPulses=812, invertDirection=False)  # 32400/47
 
 		# self.check_box_combo
 
@@ -48,7 +54,6 @@ class Example(QWidget):
 		self.iso_button = self.set_iso_button()
 
 		self.stop_move = self.stop_motor_move()
-
 
 		self.click_ap(self.ap_button)
 		self.click_iso(self.iso_button)
@@ -74,10 +79,6 @@ class Example(QWidget):
 
 		self.motor_2_cm = self.set_motor_2_travel()
 
-		try:
-			self.m2_cm_value = int(self.motor_2_cm.text())
-		except ValueError:
-			self.m2_cm_value = 5
 
 		self.motor_2_direction = self.motor_2_direction()
 
@@ -86,10 +87,12 @@ class Example(QWidget):
 		self.manual_move_1 = self.set_manual_move_m1()
 		self.manual_move_2 = self.set_manual_move_m2()
 
-		self.manual_move_1.clicked.connect(self.move_m1)
+		self.manual_move_1.clicked.connect(self.run_move_m1)
 
+		self.click_m1_direction(self.motor_1_direction)
+		self.click_m2_direction(self.motor_2_direction)
 
-
+		stop_button.clicked.connect(self.stoph)
 		start_button.clicked.connect(self.runp)
 
 		horizontal_adjust = self.set_hbox(self.ap_button, self.iso_button, self.shutter_button)
@@ -114,21 +117,50 @@ class Example(QWidget):
 		self.setGeometry(200, 100, 1550, 850)  # 200, 100, 1550, 850
 		self.setWindowTitle('Exposure Stacks')
 
-
 		self.show()
 
 		self.control = None
 
 
+	def run_move_m1(self):
+
+		self.m1_cm_value = int(self.motor_1_cm.text())
+		print(self.m1_cm_value)
+		print(self.m1_direction)
+		Motor.motor1.moveCm(self.m1_cm_value, self.m1_direction)
+
+	def run_move_m2(self):
+
+		self.m2_cm_value = int(self.motor_2_cm.text())
+		print(self.m2_cm_value)
+		print(self.m2_direction)
+		Motor.motor2.moveCm(self.m2_cm_value, self.m2_direction)
+
+	def stoph(self):
+
+		sys.exit()
 
 	def move_m1(self):
 
 		self.m1_cm_value = float(self.motor_1_cm.text())
-		self.m1_direction = "To the Edge"
 
-	def m1_dir(self, motor_1_direction):
+	def click_m1_direction(self, motor_1_direction):
 
-		motor_1_direction.activated[str].connect(self.ap_onSelected)
+		motor_1_direction.activated[str].connect(self.m1_dir_onSelected)
+
+	def m1_dir_onSelected(self, m1_dir):
+
+		self.m1_direction = m1_dir
+		print(self.m1_direction)
+
+	def click_m2_direction(self, motor_2_direction):
+
+		motor_2_direction.activated[str].connect(self.m2_dir_onSelected)
+
+	def m2_dir_onSelected(self, m2_dir):
+
+		self.m2_direction = m2_dir
+		print(self.m2_direction)
 
 	def ImageUpdateSlot(self, Image):
 
@@ -155,8 +187,8 @@ class Example(QWidget):
 	def motor_1_direction(self):
 
 		combobox3 = QComboBox(self)
-		combobox3.addItem("To the Edge")
-		combobox3.addItem("To the Power Source")
+		combobox3.addItem("toEdge")
+		combobox3.addItem("toMotor")
 		combobox3.setFixedWidth(130)
 		combobox3.setFixedHeight(20)
 		combobox3.move(180, 530)
@@ -183,8 +215,8 @@ class Example(QWidget):
 	def motor_2_direction(self):
 
 		combobox4 = QComboBox(self)
-		combobox4.addItem("To the Edge")
-		combobox4.addItem("To the Power Source")
+		combobox4.addItem("ToEdge")
+		combobox4.addItem("toMotor")
 		combobox4.setFixedWidth(130)
 		combobox4.setFixedHeight(20)
 		combobox4.move(180, 630)
@@ -196,30 +228,60 @@ class Example(QWidget):
 
 	def runp(self):
 
+		start_time = time.time()
+
 		self.setShutterList()
 
 		print(self.shutter_list, self.aperture_v, self.iso_v)
 
-		self.control = control.Control(self.shutter_list, self.aperture_v, self.iso_v) #pass in motor step size(cm) for motor1 and 2
+
+
+		self.control = control.Control(self.shutter_list, self.aperture_v, self.iso_v, self.m1_cm_value, self.m2_cm_value, self.m1_direction, self.m2_direction) #pass in motor step size(cm) for motor1 and 2
 
 		#On the view
-		#Include options to control motor cm, and direction -----------------
-		#include number slider to control how many stacks to take -------------------
+		#Include options to control motor cm, and direction ||||||||||||||||
+		#include number slider to control how many stacks to take |||||||||||||||
 		#camera view
-		#press a button to move the motors left and right -----------------------
-		#recalculate cm constants
+		#press a button to move the motors left and right |||||||||||||||||||||
+		#recalculate cm constants ||||||||||||||||||||||
 
-		#write out a simple file containing
-		#shutter_list, aperature_v, iso_v
-		#the time the capture started
-		#motor movement for motor 1 and 2
-		#Number of steps
+		#write out a simple file containing |||||||||||||||||
+		#shutter_list, aperature_v, iso_v |||||||||||||||||
+		#the time the capture started |||||||||||||||||||
+		#motor movement for motor 1 and 2 |||||||||||||
+		#Number of steps ||||||||||||||||
 
 
-		for i in range(50):
-			self.control.motorMoveStep()
-			#self.camera.takePicture update THe view
+
+		stack_number = int(self.stack_button.text())
+		print(stack_number)
+
+		shutter_str = "Shutter List is: " + self.shutter_list + "\n"
+		ap_str = "Aperture Value is: " + self.aperture_v + "\n"
+		iso_str = "ISO Value is: " + self.iso_v + "\n"
+		start_str = "Capture start time at: " + start_time + "\n"
+		stack_str = "Number of Stacks: " + stack_number + "\n"
+		m1_str = "Motor 1 Direction: " + self.m1_direction + '\n'
+		m2_str = "Motor 2 Direction: " + self.m2_direction + '\n'
+
+		print("running")
+		L = [shutter_str, ap_str, iso_str, start_str, stack_str, m1_str, m2_str]
+
+		f = open("runfile.txt", "a")
+		f.writelines(L)
+		f.close()
+
+		for i in range(stack_number):
+			self.control.motor_1_MoveStep()
+			#self.camera.takePicture update the view
 			self.control.captureStack()
+
+		end_time = time.time() - start_time
+
+		f = open("runfile.txt", "a")
+		f.write("Capture end time is: ", end_time, "\n")
+		f.close()
+
 
 	def stacks(self):
 
