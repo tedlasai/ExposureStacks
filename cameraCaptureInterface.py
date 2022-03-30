@@ -249,8 +249,7 @@ class Example(QWidget):
 		print(self.m1_direction)
 		self.motor1.moveCm(self.m1_cm_value, self.m1_direction)
 		self.click_photo()
-		self.update_picture()
-		self.update()  # where self is the name of the window you want to force to update
+		self.captureView.imageSaved.connect(self.update_picture)
 
 	def run_move_m2(self):
 
@@ -378,35 +377,40 @@ class Example(QWidget):
 		stack_number = int(self.stack_label.text())
 		print(stack_number)
 
-		shutter_str = "Shutter List is: " + self.shutter_list + "\n"
+		shutter_str = "Shutter List is: " + str(self.shutter_list) + "\n"
 		ap_str = "Aperture Value is: " + self.aperture_v + "\n"
 		iso_str = "ISO Value is: " + self.iso_v + "\n"
-		start_str = "Capture start time at: " + start_time + "\n"
-		stack_str = "Number of Stacks: " + stack_number + "\n"
-		m1_str = "Motor 1 Direction: " + self.m1_direction + '\n'
-		m2_str = "Motor 2 Direction: " + self.m2_direction + '\n'
+		start_str = "Capture start time at: " + str(start_time) + "\n"
+		stack_str = "Number of Stacks: " + str(stack_number) + "\n"
+		m1_str = "Motor 1 Direction: " + str(self.m1_direction) + '\n'
+		m2_str = "Motor 2 Direction: " + str(self.m2_direction) + '\n'
 
 		print("running")
 		L = [shutter_str, ap_str, iso_str, start_str, stack_str, m1_str, m2_str]
 
-		f = open("runfile.txt", "w")
+		folderStore = os.path.join(os.path.dirname(__file__), 'Exposures', self.dataset_name_label.text())
+		# capture the image and save it on the save path
+		os.makedirs(folderStore, exist_ok=True)
+		captureFileName = os.path.join(folderStore, "runSpecs.txt")
+
+		f = open(captureFileName, "w")
 		f.writelines(L)
 		f.close()
 		self.runningCapture = True
 
 		for i in range(stack_number):
-			self.run
-			self.control.motor_2_MoveStep()
-			#self.camera.takePicture update the view
+			self.run_move_m1()
+			self.run_move_m2()
 			self.control.captureStack()
 			self.click_photo()
-			self.update_picture()
+			self.captureView.imageSaved.connect(self.update_picture)
+
 		self.runningCapture = False
 
 		end_time = time.time() - start_time
 
-		f = open("runfile.txt", "a")
-		f.write("Capture end time is: ", end_time, "\n")
+		f = open(captureFileName, "a")
+		f.write("Capture end time is: " + str(end_time) + "\n")
 		f.close()
 
 
@@ -419,6 +423,8 @@ class Example(QWidget):
 
 
 		self.display_image(files[-1])
+		self.update()  # where self is the name of the window you want to force to update
+
 
 	def stacks(self):
 

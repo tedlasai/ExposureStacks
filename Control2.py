@@ -27,6 +27,7 @@ class Control():
 
         self.camera = Camera.Camera()
         self.motor1 = motor.Motor(directionPin=6, pulsePin=7, cmToPulses= 812 , invertDirection=False)
+        self.motor2 = motor.Motor(directionPin=3, pulsePin=4, cmToPulses=800, invertDirection=True)
 
         self.aperture_number = self.camera.get_aperture_number(self.aperture_name)
         self.iso_number = self.camera.get_iso_number(self.iso_name)
