@@ -7,7 +7,7 @@ from exif import Image
 import time
 import platform
 
-path = r"/Users/saitedla/OneDrive - York University/School/York/Lab/ExposureData/ColorfulSceneSmall"
+path = r"C:\Users\tedlasai\OneDrive - York University\School\York\Lab\ExposureData\Test"
 
 joinPathChar = "/"
 if(platform.system() == "Windows"):
@@ -37,9 +37,7 @@ folder_iterations = math.ceil(len(df) / 12)
 start = 0
 for i in range(0, folder_iterations):
 
-    folderNum = "{:0>2d}".format(i+1)
-    fold_path = path + joinPathChar + 'Frame_' + folderNum
-    os.makedirs(fold_path)
+    frameNum = "{:0>2d}".format(i+1)
 
     while start < (i + 1) * 12:
 
@@ -56,12 +54,12 @@ for i in range(0, folder_iterations):
 
         exp_time = "{:06.3f}".format(exp_time)
 
-        new_file_path = fold_path + joinPathChar + 'Frame_' + folderNum + '_Shutter_Value_' + str(exp_time) + '.jpg'
+        new_file_path = path + joinPathChar + 'Frame_' + frameNum + '_Shutter_Value_' + str(exp_time) + '.jpg'
         os.rename(sorted_file_path, new_file_path)
 
         file_name = df.iloc[start][0][:-4]
         cr2_file = path + joinPathChar + file_name + '.CR2'
-        new_cr2_file_path = fold_path + joinPathChar + 'Frame_' + folderNum + '_Shutter_Value_' + str(exp_time) + '.CR2'
+        new_cr2_file_path = path + joinPathChar + 'Frame_' + frameNum + '_Shutter_Value_' + str(exp_time) + '.CR2'
         os.rename(cr2_file, new_cr2_file_path)
 
         start = start + 1

@@ -12,6 +12,7 @@ from PyQt5.QtMultimedia import *
 from PyQt5.QtMultimediaWidgets import *
 from PyQt5.QtGui import QPixmap
 import os
+
 import glob
 from PyQt5.QtWidgets import QApplication, QWidget, QComboBox, QPushButton, QVBoxLayout
 from PyQt5.QtCore import Qt
@@ -24,7 +25,8 @@ import cv2
 import Control2 as control
 import motor
 import time
-import time
+
+from datetime import datetime
 import traceback, sys
 from PyQt5.QtMultimedia import QCameraImageCapture
 from PyQt5.QtWidgets import QApplication, QWidget, QComboBox, QPushButton, QVBoxLayout
@@ -36,6 +38,7 @@ from PyQt5.QtCore import *
 import cv2
 import Control2 as control
 from motor import Motor
+from torch import Torch
 import time
 import numpy as np
 
@@ -66,19 +69,11 @@ class Example(QWidget):
 		self.m1_cm_value = 0
 		self.m2_cm_value = 0
 
-		self.motor1 = Motor(directionPin=6, pulsePin=7, cmToPulses=812, invertDirection=False)  # 32400/47
-		self.motor2 = Motor(directionPin=3, pulsePin=4, cmToPulses= 800, invertDirection=True)
-
-		self.available_cameras = QCameraInfo.availableCameras()
-		if not self.available_cameras:
-			# exit the code
-			sys.exit()
+		self.init_tor = "OFF"
+		self.final_tor = "OFF"
 
 
 		self.save_path = os.path.join(os.path.dirname(__file__), 'Exposures', 'Viewing')
-		self.select_camera(0)
-
-		self.captureView = QCameraImageCapture(self.camera)
 
 		self.runningCapture = False # variable to track if we are running a capture
 
@@ -120,6 +115,14 @@ class Example(QWidget):
 
 		self.motor_2_direction = self.motor_2_direction()
 
+		self.init_torch = self.init_torch()
+		self.final_torch = self.final_torch()
+
+		self.control = control.Control() #pass in motor step size(cm) for motor1 and 2
+
+		self.mod_to_mod(0)
+
+
 		self.stack_label = self.stacks()
 		self.dataset_name_label = self.dataset_name_create_button()
 
@@ -132,8 +135,12 @@ class Example(QWidget):
 		self.click_m1_direction(self.motor_1_direction)
 		self.click_m2_direction(self.motor_2_direction)
 
+
+
 		stop_button.clicked.connect(self.stoph)
 		start_button.clicked.connect(self.runp)
+
+		self.flashlight_toggle = self.flashlight_toggle_button()
 
 
 		self.horizontal_adjust = self.set_hbox(self.ap_button, self.iso_button, self.shutter_button)
@@ -149,15 +156,10 @@ class Example(QWidget):
 		self.FeedLabel = QLabel()
 		self.horizontal_adjust.addWidget(self.FeedLabel)
 
-		self.click_photo()
 
 		self.labelImage = QLabel(self)
 		self.horizontal_adjust.addWidget(self.labelImage)
 		#self.update_picture()
-		self.captureView.imageSaved.connect(self.update_picture)
-
-		print("HELLO")
-		#
 
 		self.setLayout(self.VBL)
 
@@ -166,97 +168,21 @@ class Example(QWidget):
 
 		self.show()
 
-		self.control = None
 
-	def display_image(self, init_img):
-
-
-		self.pixmap = QPixmap(init_img)
-		self.pixmap = self.pixmap.scaled(500, 500, QtCore.Qt.KeepAspectRatio, Qt.FastTransformation)
-		self.labelImage.setPixmap(self.pixmap)
-
-		#self.labelImage.move(600, 200)
-
-		self.show()
-
-	def click_photo(self):
-
-		# time stamp
-		timestamp = time.strftime("%d-%b-%Y-%H_%M_%S")
-
-
-		if not self.runningCapture:
-			folderStore = 'Viewing'
-		else:
-			folderStore = self.dataset_name_label.text()
-		# capture the image and save it on the save path
-		captureId = self.captureView.capture(os.path.join(os.path.dirname(__file__), 'Exposures', folderStore,
-										  "%s-%04d-%s.jpg" % (
-											  self.current_camera_name,
-											  self.save_seq,
-											  timestamp
-										  )))
-
-		#while(True):
-			#print("HELLO")
-
-
-		# increment the sequence
-		self.save_seq += 1
-
-
-		QApplication.processEvents()
-
-	def select_camera(self, i):
-
-		# getting the selected camera
-		self.camera = QCamera(self.available_cameras[i])
-
-		# setting view finder to the camera
-		# self.camera.setViewfinder(self.viewfinder)
-
-		# setting capture mode to the camera
-		self.camera.setCaptureMode(QCamera.CaptureStillImage)
-
-		# if any error occur show the alert
-		self.camera.error.connect(lambda: self.alert(self.camera.errorString()))
-
-		# start the camera
-		self.camera.start()
-
-		# creating a QCameraImageCapture object
-		self.captureView = QCameraImageCapture(self.camera)
-
-		# showing alert if error occur
-		self.captureView.error.connect(lambda error_msg, error,
-											  msg: self.alert(msg))
-
-		# when image captured showing message
-		self.captureView.imageCaptured.connect(lambda d,
-													  i: self.status.showMessage("Image captured : "
-																			 + str(self.save_seq)))
-
-		# getting current camera name
-		self.current_camera_name = self.available_cameras[i].description()
-
-		# inital save sequence
-		self.save_seq = 0
 
 	def run_move_m1(self):
 
-		self.m1_cm_value = int(self.motor_1_cm.text())
+		self.m1_cm_value = float(self.motor_1_cm.text())
 		print(self.m1_cm_value)
 		print(self.m1_direction)
-		self.motor1.moveCm(self.m1_cm_value, self.m1_direction)
-		self.click_photo()
-		self.captureView.imageSaved.connect(self.update_picture)
+		self.control.motor1.moveCm(self.m1_cm_value, self.m1_direction)
 
 	def run_move_m2(self):
 
-		self.m2_cm_value = int(self.motor_2_cm.text())
+		self.m2_cm_value = float(self.motor_2_cm.text())
 		print(self.m2_cm_value)
 		print(self.m2_direction)
-		self.motor2.moveCm(self.m2_cm_value, self.m2_direction)
+		self.control.motor2.moveCm(self.m2_cm_value, self.m2_direction)
 
 	def stoph(self):
 
@@ -349,7 +275,7 @@ class Example(QWidget):
 
 	def runp(self):
 
-		start_time = time.time()
+		start_time = datetime.now()
 
 		self.setShutterList()
 
@@ -357,7 +283,6 @@ class Example(QWidget):
 
 
 
-		self.control = control.Control(self.shutter_list, self.aperture_v, self.iso_v, self.m1_cm_value, self.m2_cm_value, self.m1_direction, self.m2_direction) #pass in motor step size(cm) for motor1 and 2
 
 		#On the view
 		#Include options to control motor cm, and direction ||||||||||||||||
@@ -377,16 +302,19 @@ class Example(QWidget):
 		stack_number = int(self.stack_label.text())
 		print(stack_number)
 
+		dataset_str = "Dataset name is: " + str(self.dataset_name_label.text()) + "\n"
 		shutter_str = "Shutter List is: " + str(self.shutter_list) + "\n"
 		ap_str = "Aperture Value is: " + self.aperture_v + "\n"
 		iso_str = "ISO Value is: " + self.iso_v + "\n"
-		start_str = "Capture start time at: " + str(start_time) + "\n"
+		start_str = "Capture start time at: " +  start_time.strftime("%m/%d/%Y, %H:%M:%S") + "\n"
 		stack_str = "Number of Stacks: " + str(stack_number) + "\n"
 		m1_str = "Motor 1 Direction: " + str(self.m1_direction) + '\n'
 		m2_str = "Motor 2 Direction: " + str(self.m2_direction) + '\n'
+		m1_str_cm = "Motor 1 StepSize(cm): " + str(self.motor_1_cm.text()) + '\n'
+		m2_str_cm = "Motor 2 StepSize(cm): " + str(self.motor_2_cm.text()) + '\n'
 
 		print("running")
-		L = [shutter_str, ap_str, iso_str, start_str, stack_str, m1_str, m2_str]
+		L = [dataset_str, shutter_str, ap_str, iso_str, start_str, stack_str, m1_str, m2_str, m1_str_cm, m2_str_cm]
 
 		folderStore = os.path.join(os.path.dirname(__file__), 'Exposures', self.dataset_name_label.text())
 		# capture the image and save it on the save path
@@ -401,29 +329,81 @@ class Example(QWidget):
 		for i in range(stack_number):
 			self.run_move_m1()
 			self.run_move_m2()
+
+			if (i % 2) == 0:
+				self.mod_to_mod(0)
+			else:
+				self.mod_to_mod(1)
+
 			self.control.captureStack()
-			self.click_photo()
-			self.captureView.imageSaved.connect(self.update_picture)
+
 
 		self.runningCapture = False
 
-		end_time = time.time() - start_time
+		end_time = datetime.now()
+		timeElapsed = end_time - start_time
 
 		f = open(captureFileName, "a")
-		f.write("Capture end time is: " + str(end_time) + "\n")
+		f.write( "Capture end time at: " +  end_time.strftime("%m/%d/%Y, %H:%M:%S") + "\n")
+		f.write("Elapsed time: " + str(timeElapsed) + "\n")
 		f.close()
 
+	def init_torch(self):
 
-	def update_picture(self, a = "", b= ""):
+		combobox8 = QComboBox(self)
+		combobox8.addItem("HIGH")
+		combobox8.addItem("MEDIUM")
+		combobox8.addItem("LOW")
+		combobox8.addItem("FLASHING")
+		combobox8.addItem("OFF")
+		combobox8.setFixedWidth(130)
+		combobox8.setFixedHeight(20)
+		combobox8.move(580, 530)
+
+		self.numStacks = QLabel("Initial Torch Mode", self)
+		self.numStacks.move(580, 500)
+
+		return combobox8
+
+	def final_torch(self):
+
+		combobox9 = QComboBox(self)
+		combobox9.addItem("HIGH")
+		combobox9.addItem("MEDIUM")
+		combobox9.addItem("LOW")
+		combobox9.addItem("FLASHING")
+		combobox9.addItem("OFF")
+		combobox9.setFixedWidth(130)
+		combobox9.setFixedHeight(20)
+		combobox9.move(780, 530)
+
+		self.numStacks = QLabel("Final Torch Mode", self)
+		self.numStacks.move(780, 500)
+
+		return combobox9
+
+	def init_torch_onSelected(self, init_tor):
+
+		self.init_tor = init_tor
+
+	def final_torch_onSelected(self, final_tor):
+
+		self.final_tor = final_tor
+
+	def mod_to_mod(self, alternator):
+
+		self.init_torch.activated[str].connect(self.init_torch_onSelected)
+		self.final_torch.activated[str].connect(self.final_torch_onSelected)
+
+		if alternator == 0:
+			set = self.control.torch1.t_mode_to_mode(self.init_tor)
+			self.control.torch1.set_light_status(set)
+		else:
+			set = self.control.torch1.t_mode_to_mode(self.final_tor)
+			self.control.torch1.set_light_status(set)
 
 
-		print(a,b)
-		files = list(filter(os.path.isfile, glob.glob(self.save_path + "\\*")))
-		files.sort(key=lambda x: os.path.getmtime(x))
 
-
-		self.display_image(files[-1])
-		self.update()  # where self is the name of the window you want to force to update
 
 
 	def stacks(self):
@@ -450,6 +430,15 @@ class Example(QWidget):
 		self.dataset_name = QLabel("DataSetName", self)
 		self.dataset_name.move(50, 300)
 		return datasetName
+
+	def flashlight_toggle_button(self):
+
+		mm1 = QPushButton('Flashlight Toggle', self)
+		mm1.setFixedWidth(100)
+		mm1.setFixedHeight(20)
+		mm1.move(1000, 530)
+
+		return mm1
 
 	def set_manual_move_m1(self):
 

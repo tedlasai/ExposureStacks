@@ -1,10 +1,11 @@
 from pyfirmata import Arduino, util
 import time
 import GS_timing as timing
+import arduino
 
 class Motor:
 
-    board = Arduino('COM3')
+    board = arduino.board
 
     def __init__(self, directionPin, pulsePin, cmToPulses,  invertDirection = False):
 

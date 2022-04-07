@@ -8,7 +8,7 @@ import GS_timing as timing
 
 class Camera:
 
-    sleepAperatureAndExposureChange = 500#ms
+    sleepAperatureAndExposureChange = 2000 #ms
 
     # shutter is the time taken for each exposure; 30" is 30 seconds, 0"8 is 0.8 seconds, 1/20 is 1/20th of a second
     shutter_data = ['30"', '25"', '20"', '15"', '13"', '10"', '8"', '6"', '5"', '4"', '3"2', '2"5', '2"',
