@@ -1,8 +1,7 @@
 import pyfirmata
-from pyfirmata import Arduino, util
 import GS_timing as timing
-from arduino import board
 from enum import Enum
+from arduino import board
 
 class LightStatus(Enum):
     HIGH = 1
@@ -14,24 +13,21 @@ class LightStatus(Enum):
 
 class Torch:
 
-    def __init__(self, pinNumber):
+    def __init__(self, pin):
 
-        self.board = board
 
         self.light_status = LightStatus.OFF
 
-        self.pin = self.board.get_pin('d:{}:o'.format(pinNumber))
+        self.pin =board.get_pin('d:{}:o'.format(pin))
 
 
 
 
     def toggle_button(self):
-        self.pin.mode = pyfirmata.OUTPUT
-        self.pin.write(0)
-        timing.delay(500)
         self.pin.write(1)
         timing.delay(500)
-        self.pin.mode = pyfirmata.INPUT
+        self.pin.write(0)
+        timing.delay(500)
 
     def set_light_status(self, light_status):
         # Type checking
@@ -74,9 +70,18 @@ class Torch:
 
 
 
-#board.digital[2].write(0)
+# torch1.set_light_status(LightStatus.HIGH)
+# timing.delayMicroseconds(5000000)
+# print(1)
 #
+# torch1.set_light_status(LightStatus.MEDIUM)
+# timing.delayMicroseconds(5000000)
+# print(2)
+#
+# torch1.set_light_status(LightStatus.LOW)
+# timing.delayMicroseconds(5000000)
+# print(3)
 #
 # torch1.set_light_status(LightStatus.OFF)
 # timing.delayMicroseconds(5000000)
-
+# print(4)

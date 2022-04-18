@@ -7,7 +7,7 @@ from exif import Image
 import time
 import platform
 
-path = r"C:\Users\tedlasai\OneDrive - York University\School\York\Lab\ExposureData\Test"
+path = r"C:\Users\tedlasai\OneDrive - York University\School\York\Lab\ExposureData\FlashingLight"
 
 joinPathChar = "/"
 if(platform.system() == "Windows"):
@@ -33,13 +33,15 @@ dict = {'file': my_files, 'timestamp': tsp}
 df = pd.DataFrame(dict)
 df = df.sort_values(by=['timestamp'])
 
-folder_iterations = math.ceil(len(df) / 12)
+stackSize = 28
+
+folder_iterations = math.ceil(len(df) / stackSize)
 start = 0
 for i in range(0, folder_iterations):
 
     frameNum = "{:0>2d}".format(i+1)
 
-    while start < (i + 1) * 12:
+    while start < (i + 1) * stackSize:
 
         try:
             sorted_file_path = path + joinPathChar + df.iloc[start][0]
@@ -50,9 +52,9 @@ for i in range(0, folder_iterations):
             img = Image(img_file)
 
         index = img.list_all().index('exposure_time')
-        exp_time = round(float(img.get(img.list_all()[index])), 3)
+        exp_time = round(float(img.get(img.list_all()[index])), 5)
 
-        exp_time = "{:06.3f}".format(exp_time)
+        exp_time = "{:08.5f}".format(exp_time)
 
         new_file_path = path + joinPathChar + 'Frame_' + frameNum + '_Shutter_Value_' + str(exp_time) + '.jpg'
         os.rename(sorted_file_path, new_file_path)

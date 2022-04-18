@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QWidget, QPushButton,
                              QHBoxLayout, QVBoxLayout, QApplication, QComboBox)
 from PyQt5.QtGui import QPixmap
 import os
-
+import time
 from datetime import datetime
 from PyQt5.QtWidgets import QApplication, QWidget, QComboBox, QPushButton, QVBoxLayout
 from PyQt5.QtCore import Qt
@@ -300,6 +300,7 @@ class Example(QWidget):
 		self.runningCapture = True
 
 
+		time.sleep(5) #sleep for 5 seconds so I can move mouse out of window in remote capture mode
 		self.control.camera.set_focus()
 		self.control.camera.reset_settings()
 		self.control.setAperatureAndIso(self.aperture_v, self.iso_v)

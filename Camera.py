@@ -10,6 +10,8 @@ class Camera:
 
     sleepAperatureAndExposureChange = 2000 #ms
 
+    sendKeysPause = 0.1
+
     # shutter is the time taken for each exposure; 30" is 30 seconds, 0"8 is 0.8 seconds, 1/20 is 1/20th of a second
     shutter_data = ['30"', '25"', '20"', '15"', '13"', '10"', '8"', '6"', '5"', '4"', '3"2', '2"5', '2"',
                     '1"6', '1"3', '1', '0"8', '0"6', '0"5', '0"4', '0"3', '1/4', '1/5', '1/6', '1/8', '1/10',
@@ -27,6 +29,8 @@ class Camera:
     def __init__(self):
 
         self.start_app()
+
+    def reset_settings(self):
         self.reset_count("aperture")
         self.reset_count("shutter")
         self.reset_count("iso")
@@ -54,6 +58,9 @@ class Camera:
 
         self.app.window(title_re=".*EOS 5D.*")
 
+    def set_focus(self):
+        self.app.EOS5DMarkIV.set_focus()
+
     def set_shutter_speed(self, shutter_speed_number):
 
         shutter = self.app.EOS5DMarkIV.child_window(auto_id="olcTv", control_type="EOSUtility.OLCTv").wrapper_object() # Shutter Speed
@@ -64,14 +71,14 @@ class Camera:
         difference = self.shutter_speed_state - shutter_speed_number
         if (difference < 0):
             for i in range(abs(difference)):
-                send_keys('{DOWN}', with_spaces=True)
+                send_keys('{DOWN}', pause = self.sendKeysPause, with_spaces=True)
         elif (difference > 0):
             for i in range(difference):
-                send_keys('{UP}', with_spaces=True)
+                send_keys('{UP}', pause = self.sendKeysPause, with_spaces=True)
         self.shutter_speed_state = shutter_speed_number
 
         timing.delay(Camera.sleepAperatureAndExposureChange)
-        send_keys('{ENTER}', with_spaces=True)
+        send_keys('{ENTER}', pause = self.sendKeysPause, with_spaces=True)
         timing.delay(Camera.sleepAperatureAndExposureChange)
 
     def set_aperture(self, aperture_number):
@@ -84,14 +91,14 @@ class Camera:
         difference = self.aperature_state - aperture_number
         if(difference < 0):
             for i in range(abs(difference)):
-                send_keys('{DOWN}', with_spaces=True)
+                send_keys('{DOWN}', pause = self.sendKeysPause, with_spaces=True)
         elif(difference > 0):
             for i in range(difference):
-                send_keys('{UP}', with_spaces=True)
+                send_keys('{UP}', pause = self.sendKeysPause, with_spaces=True)
         self.aperature_state = aperture_number
 
         timing.delay(Camera.sleepAperatureAndExposureChange)
-        send_keys('{ENTER}', with_spaces=True)
+        send_keys('{ENTER}', pause = self.sendKeysPause, with_spaces=True)
         timing.delay(Camera.sleepAperatureAndExposureChange)
 
     def set_iso(self, iso_number):
@@ -103,14 +110,14 @@ class Camera:
         difference = self.iso_state - iso_number
         if (difference < 0):
             for i in range(abs(difference)):
-                send_keys('{DOWN}', with_spaces=True)
+                send_keys('{DOWN}', pause = self.sendKeysPause, with_spaces=True)
         elif (difference > 0):
             for i in range(difference):
-                send_keys('{UP}', with_spaces=True)
+                send_keys('{UP}', pause = self.sendKeysPause, with_spaces=True)
         self.iso_state = iso_number
 
         timing.delay(Camera.sleepAperatureAndExposureChange)
-        send_keys('{ENTER}', with_spaces=True)
+        send_keys('{ENTER}', pause = self.sendKeysPause, with_spaces=True)
         timing.delay(Camera.sleepAperatureAndExposureChange)
 
     def shoot_picture(self, shutter_speed_number, aperture_number):
@@ -147,11 +154,11 @@ class Camera:
             aperture.click_input()
 
             for i in range(16):
-                send_keys('{UP}', with_spaces=True)
+                send_keys('{UP}', pause = self.sendKeysPause, with_spaces=True)
 
             print("aperture reset done")
             timing.delay(Camera.sleepAperatureAndExposureChange)
-            send_keys('{ENTER}', with_spaces=True)
+            send_keys('{ENTER}', pause = self.sendKeysPause, with_spaces=True)
             timing.delay(Camera.sleepAperatureAndExposureChange)
             self.aperature_state = 0
 
@@ -162,7 +169,7 @@ class Camera:
             shutter.click_input()
 
             for i in range(55):
-                send_keys('{UP}', with_spaces=True)
+                send_keys('{UP}', pause = self.sendKeysPause, with_spaces=True)
 
             print("shutter reset done")
             timing.delay(Camera.sleepAperatureAndExposureChange)
@@ -176,11 +183,11 @@ class Camera:
             iso.click_input()
 
             for i in range(27):
-                send_keys('{UP}', with_spaces=True)
+                send_keys('{UP}', pause = self.sendKeysPause, with_spaces=True)
 
             print("iso reset done")
             timing.delay(Camera.sleepAperatureAndExposureChange)
-            send_keys('{ENTER}', with_spaces=True)
+            send_keys('{ENTER}', pause = self.sendKeysPause, with_spaces=True)
             timing.delay(Camera.sleepAperatureAndExposureChange)
             self.iso_state = 0
 

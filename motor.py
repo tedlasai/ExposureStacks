@@ -1,16 +1,14 @@
-from pyfirmata import Arduino, util
-import time
 import GS_timing as timing
-import arduino
+from arduino import board
+
 
 class Motor:
 
-    board = arduino.board
+    def __init__(self,directionPin, pulsePin, cmToPulses,  invertDirection = False):
 
-    def __init__(self, directionPin, pulsePin, cmToPulses,  invertDirection = False):
+        self.directionPin = board.get_pin('d:{}:o'.format(directionPin))
+        self.pulsePin = board.get_pin('d:{}:o'.format(pulsePin))
 
-        self.directionPin = directionPin
-        self.pulsePin = pulsePin
         self.invertDirection = invertDirection
         self.cmToPulses = cmToPulses
 
@@ -29,33 +27,40 @@ class Motor:
         #set direction
         if self.invertDirection: #invert controls
             if direction:
-                self.board.digital[self.directionPin].write(0)
+                self.directionPin.write(0)
             else:
-                self.board.digital[self.directionPin].write(1)
+                self.directionPin.write(1)
         else: #normal controls
             if direction:
-                self.board.digital[self.directionPin].write(1)
+                self.directionPin.write(1)
             else:
-                self.board.digital[self.directionPin].write(0)
+                self.directionPin.write(0)
 
     #direction is boolean because it can only be high or low
     #High is True, Low is False
     def setPulse(self, high):
         #set direction
         if high:
-            self.board.digital[self.pulsePin].write(1)
+            self.pulsePin.write(1)
         else:
-            self.board.digital[self.pulsePin].write(0)
+            self.pulsePin.write(0)
 
     def move(self, pulses, direction):
+        print("DIRECTION SET")
         self.setDirection(direction)
 
+        print("PUSLING")
         for i in range(pulses):  # 400 pulses per revolution. range (x) / 400 is the number of revolutions
+            print("Pulse False Set")
             self.setPulse(False)
+            print("Finished Pulse False Set")
+            print("Delay Start")
             timing.delayMicroseconds(500)
+            print("Delay Finish")
             self.setPulse(True)
             timing.delayMicroseconds(20)
 
+        print("FINISHED PULSING")
         timing.delay(1000)
 
     def moveCm(self, centimeters, direction ):
