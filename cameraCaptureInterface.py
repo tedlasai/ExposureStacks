@@ -1,46 +1,17 @@
-#!/usr/bin/python
 
-import sys
 from PyQt5.QtWidgets import (QWidget, QPushButton,
                              QHBoxLayout, QVBoxLayout, QApplication, QComboBox)
-from PyQt5ThreadExample import Worker
-import sys
-from PyQt5.QtWidgets import (QWidget, QPushButton,
-                             QHBoxLayout, QVBoxLayout, QApplication, QComboBox)
-from PyQt5.QtWidgets import *
-from PyQt5.QtMultimedia import *
-from PyQt5.QtMultimediaWidgets import *
 from PyQt5.QtGui import QPixmap
 import os
 
-import glob
-from PyQt5.QtWidgets import QApplication, QWidget, QComboBox, QPushButton, QVBoxLayout
-from PyQt5.QtCore import Qt
-from PyQt5 import QtCore, QtGui, QtWidgets
-import sys
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-import cv2
-import Control2 as control
-import motor
-import time
-
 from datetime import datetime
-import traceback, sys
-from PyQt5.QtMultimedia import QCameraImageCapture
 from PyQt5.QtWidgets import QApplication, QWidget, QComboBox, QPushButton, QVBoxLayout
 from PyQt5.QtCore import Qt
 import sys
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-import cv2
-import Control2 as control
-from motor import Motor
-from torch import Torch
-import time
-import numpy as np
+from Control2 import Control
 
 aperture_data = ['F4.0', 'F4.5', 'F5.0', 'F5.6', 'F6.3', 'F7.1', 'F8.0', 'F9.0', 'F10', 'F11', 'F13', 'F14','F16', 'F18', 'F20', 'F22']
 
@@ -58,6 +29,7 @@ class Example(QWidget):
 		super().__init__()
 
 
+		self.control = Control() #pass in motor step size(cm) for motor1 and 2
 
 		self.shutter_list = ['30"']
 		self.iso_v = 'AUTO'
@@ -69,13 +41,15 @@ class Example(QWidget):
 		self.m1_cm_value = 0
 		self.m2_cm_value = 0
 
-		self.init_tor = "OFF"
-		self.final_tor = "OFF"
+		self.init_tor = ["HIGH"]
+		# self.final_tor = "HIGH"
 
 
 		self.save_path = os.path.join(os.path.dirname(__file__), 'Exposures', 'Viewing')
 
 		self.runningCapture = False # variable to track if we are running a capture
+		# timing.delay(1000)
+
 
 		self.initUI()
 		# self.check_box_combo
@@ -115,12 +89,12 @@ class Example(QWidget):
 
 		self.motor_2_direction = self.motor_2_direction()
 
-		self.init_torch = self.init_torch()
-		self.final_torch = self.final_torch()
+		self.init_torch = self.torch_mode()
+		# self.final_torch = self.final_torch()
 
-		self.control = control.Control() #pass in motor step size(cm) for motor1 and 2
+		self.init_torch.activated[str].connect(self.init_torch_onSelected)
+		# self.final_torch.activated[str].connect(self.final_torch_onSelected)
 
-		self.mod_to_mod(0)
 
 
 		self.stack_label = self.stacks()
@@ -141,7 +115,7 @@ class Example(QWidget):
 		start_button.clicked.connect(self.runp)
 
 		self.flashlight_toggle = self.flashlight_toggle_button()
-
+		self.flashlight_toggle.clicked.connect(self.manual_toggle_torch)
 
 		self.horizontal_adjust = self.set_hbox(self.ap_button, self.iso_button, self.shutter_button)
 
@@ -163,12 +137,10 @@ class Example(QWidget):
 
 		self.setLayout(self.VBL)
 
-		self.setGeometry(200, 100, 1550, 850)  # 200, 100, 1550, 850
+		self.setGeometry(200, 100, 500, 850)  # 200, 100, 1550, 850
 		self.setWindowTitle('Exposure Stacks')
 
 		self.show()
-
-
 
 	def run_move_m1(self):
 
@@ -182,7 +154,9 @@ class Example(QWidget):
 		self.m2_cm_value = float(self.motor_2_cm.text())
 		print(self.m2_cm_value)
 		print(self.m2_direction)
+		print("OVER HERE")
 		self.control.motor2.moveCm(self.m2_cm_value, self.m2_direction)
+
 
 	def stoph(self):
 
@@ -282,8 +256,6 @@ class Example(QWidget):
 		print(self.shutter_list, self.aperture_v, self.iso_v)
 
 
-
-
 		#On the view
 		#Include options to control motor cm, and direction ||||||||||||||||
 		#include number slider to control how many stacks to take |||||||||||||||
@@ -312,9 +284,10 @@ class Example(QWidget):
 		m2_str = "Motor 2 Direction: " + str(self.m2_direction) + '\n'
 		m1_str_cm = "Motor 1 StepSize(cm): " + str(self.motor_1_cm.text()) + '\n'
 		m2_str_cm = "Motor 2 StepSize(cm): " + str(self.motor_2_cm.text()) + '\n'
+		torch_modes_str = "Torch Modes are: " + str(self.init_tor) + '\n'
 
 		print("running")
-		L = [dataset_str, shutter_str, ap_str, iso_str, start_str, stack_str, m1_str, m2_str, m1_str_cm, m2_str_cm]
+		L = [dataset_str, shutter_str, ap_str, iso_str, start_str, stack_str, m1_str, m2_str, m1_str_cm, m2_str_cm, torch_modes_str]
 
 		folderStore = os.path.join(os.path.dirname(__file__), 'Exposures', self.dataset_name_label.text())
 		# capture the image and save it on the save path
@@ -326,16 +299,49 @@ class Example(QWidget):
 		f.close()
 		self.runningCapture = True
 
+
+		self.control.camera.set_focus()
+		self.control.camera.reset_settings()
+		self.control.setAperatureAndIso(self.aperture_v, self.iso_v)
+
+		#choose some dropdown
+		# light_mode_1 = ["HIGH", "MEDIUM", "LOW", "OFF"]
+		# light_mode_2 = ["HIGH", "MEDIUM", "LOW"]
+		# light_mode_2 = ["HIGH", "MEDIUM"]
+		# light_mode_2 = ["HIGH", "LOW"]
+		# light_mode_3 = ["MEDIUM", "LOW"]
+		# light_mode_3 = ["HIGH", "OFF"]
+		# light_mode_3 = ["MEDIUM", "OFF"]
+		# light_mode_3 = ["LOW", "OFF"]
+		# light_mode_4 = ["HIGH"]
+		# light_mode_4 = ["MEDIUM"]
+		# light_mode_4 = ["LOW"]
+		# light_mode_5 = ["OFF"]
+
+
 		for i in range(stack_number):
+
 			self.run_move_m1()
 			self.run_move_m2()
 
-			if (i % 2) == 0:
-				self.mod_to_mod(0)
-			else:
-				self.mod_to_mod(1)
+			#set light status
+			# light[i%4] #instead of 4 use len(light)
 
-			self.control.captureStack()
+			# if (i % 2) == 0:
+			# 	self.mod_to_mod(0)
+			# 	print("LIGHT HIGH")
+				# print("current torch mode is ", torch_list[i%len(torch_list)])
+			# else:
+			# 	self.mod_to_mod(1)
+			# 	print("LIGHT LOW")
+			current_mode = i % len(self.init_tor)
+			self.mod_to_mod(self.init_tor[current_mode])
+
+			print("current torch mode is ", self.init_tor[current_mode])
+
+			self.control.captureStack(self.shutter_list)
+
+		print("data set capture completed")
 
 
 		self.runningCapture = False
@@ -344,63 +350,86 @@ class Example(QWidget):
 		timeElapsed = end_time - start_time
 
 		f = open(captureFileName, "a")
-		f.write( "Capture end time at: " +  end_time.strftime("%m/%d/%Y, %H:%M:%S") + "\n")
+		f.write("Capture end time at: " +  end_time.strftime("%m/%d/%Y, %H:%M:%S") + "\n")
 		f.write("Elapsed time: " + str(timeElapsed) + "\n")
 		f.close()
 
-	def init_torch(self):
+	def torch_mode(self):
 
 		combobox8 = QComboBox(self)
+
+		combobox8.addItem("HIGH/MEDIUM/LOW/OFF")
+		combobox8.addItem("HIGH/MEDIUM/LOW")
+		combobox8.addItem("HIGH/MEDIUM")
+		combobox8.addItem("HIGH/LOW")
+		combobox8.addItem("MEDIUM/LOW")
+		combobox8.addItem("HIGH/OFF")
+		combobox8.addItem("MEDIUM/OFF")
+		combobox8.addItem("LOW/OFF")
 		combobox8.addItem("HIGH")
 		combobox8.addItem("MEDIUM")
 		combobox8.addItem("LOW")
-		combobox8.addItem("FLASHING")
 		combobox8.addItem("OFF")
-		combobox8.setFixedWidth(130)
-		combobox8.setFixedHeight(20)
-		combobox8.move(580, 530)
 
-		self.numStacks = QLabel("Initial Torch Mode", self)
-		self.numStacks.move(580, 500)
+
+		# light_mode_1 = ["HIGH", "MEDIUM", "LOW", "OFF"]
+		# light_mode_2 = ["HIGH", "MEDIUM", "LOW"]
+		# light_mode_2 = ["HIGH", "MEDIUM"]
+		# light_mode_2 = ["HIGH", "LOW"]
+		# light_mode_3 = ["MEDIUM", "LOW"]
+		# light_mode_3 = ["HIGH", "OFF"]
+		# light_mode_3 = ["MEDIUM", "OFF"]
+		# light_mode_3 = ["LOW", "OFF"]
+		# light_mode_4 = ["HIGH"]
+		# light_mode_4 = ["MEDIUM"]
+		# light_mode_4 = ["LOW"]
+		# light_mode_5 = ["OFF"]
+
+		combobox8.setFixedWidth(180)
+		combobox8.setFixedHeight(30)
+		combobox8.move(100, 700)
+
+		self.numStacks = QLabel("Torch Mode", self)
+		self.numStacks.move(100, 670)
 
 		return combobox8
 
-	def final_torch(self):
-
-		combobox9 = QComboBox(self)
-		combobox9.addItem("HIGH")
-		combobox9.addItem("MEDIUM")
-		combobox9.addItem("LOW")
-		combobox9.addItem("FLASHING")
-		combobox9.addItem("OFF")
-		combobox9.setFixedWidth(130)
-		combobox9.setFixedHeight(20)
-		combobox9.move(780, 530)
-
-		self.numStacks = QLabel("Final Torch Mode", self)
-		self.numStacks.move(780, 500)
-
-		return combobox9
+	# def final_torch(self):
+	#
+	# 	combobox9 = QComboBox(self)
+	# 	combobox9.addItem("HIGH")
+	# 	combobox9.addItem("MEDIUM")
+	# 	combobox9.addItem("LOW")
+	# 	combobox9.addItem("FLASHING")
+	# 	combobox9.addItem("OFF")
+	# 	combobox9.setFixedWidth(130)
+	# 	combobox9.setFixedHeight(20)
+	# 	combobox9.move(100, 740)
+	#
+	# 	self.numStacks = QLabel("Final Torch Mode", self)
+	# 	self.numStacks.move(100, 720)
+	#
+	# 	return combobox9
 
 	def init_torch_onSelected(self, init_tor):
 
-		self.init_tor = init_tor
+		self.init_tor = init_tor.split("/")
 
-	def final_torch_onSelected(self, final_tor):
+	# def final_torch_onSelected(self, final_tor):
+	#
+	# 	self.final_tor = final_tor
 
-		self.final_tor = final_tor
+	def mod_to_mod(self, alternator_mode):
 
-	def mod_to_mod(self, alternator):
+		# if alternator == 0:
+		# 	set = self.control.torch1.t_mode_to_mode(self.init_tor)
+		# 	self.control.torch1.set_light_status(set)
+		# else:
+		# 	set = self.control.torch1.t_mode_to_mode(self.final_tor)
+		# 	self.control.torch1.set_light_status(set)
 
-		self.init_torch.activated[str].connect(self.init_torch_onSelected)
-		self.final_torch.activated[str].connect(self.final_torch_onSelected)
-
-		if alternator == 0:
-			set = self.control.torch1.t_mode_to_mode(self.init_tor)
-			self.control.torch1.set_light_status(set)
-		else:
-			set = self.control.torch1.t_mode_to_mode(self.final_tor)
-			self.control.torch1.set_light_status(set)
+		set = self.control.torch1.t_mode_to_mode(alternator_mode)
+		self.control.torch1.set_light_status(set)
 
 
 
@@ -413,7 +442,7 @@ class Example(QWidget):
 		numStacks.setFixedHeight(20)
 
 
-		
+
 		self.numStacks = QLabel("Number of Stacks", self)
 		self.numStacks.move(50, 400)
 
@@ -436,9 +465,12 @@ class Example(QWidget):
 		mm1 = QPushButton('Flashlight Toggle', self)
 		mm1.setFixedWidth(100)
 		mm1.setFixedHeight(20)
-		mm1.move(1000, 530)
+		mm1.move(100, 760)
 
 		return mm1
+
+	def manual_toggle_torch(self):
+		self.control.torch1.toggle_button()
 
 	def set_manual_move_m1(self):
 
