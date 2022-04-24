@@ -18,16 +18,19 @@ class Torch:
 
         self.light_status = LightStatus.OFF
 
-        self.pin =board.get_pin('d:{}:o'.format(pin))
+        self.pin =board.get_pin('d:{}:i'.format(pin))
+        #self.pin.write(1)
 
 
 
 
     def toggle_button(self):
-        self.pin.write(1)
-        timing.delay(500)
+        self.pin.mode = pyfirmata.OUTPUT
         self.pin.write(0)
         timing.delay(500)
+        self.pin.write(1)
+        timing.delay(500)
+        self.pin.mode = pyfirmata.INPUT
 
     def set_light_status(self, light_status):
         # Type checking

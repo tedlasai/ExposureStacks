@@ -8,9 +8,10 @@ class Control():
 
         self.camera = Camera.Camera()
         self.motor1 = motor.Motor(directionPin=6, pulsePin=8, cmToPulses= 812 , invertDirection=False)
-        self.motor2 = motor.Motor(directionPin=11, pulsePin=13, cmToPulses=800, invertDirection=True)
+        self.motor2 = motor.Motor(directionPin=11, pulsePin=13, cmToPulses= 790, invertDirection=True)
 
         self.torch1 = torch.Torch(pin=2)
+        self.torch_stationary = torch.Torch(pin=4)
 
 
 

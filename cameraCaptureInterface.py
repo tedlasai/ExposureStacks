@@ -11,6 +11,8 @@ import sys
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+
+import torch
 from Control2 import Control
 
 aperture_data = ['F4.0', 'F4.5', 'F5.0', 'F5.6', 'F6.3', 'F7.1', 'F8.0', 'F9.0', 'F10', 'F11', 'F13', 'F14','F16', 'F18', 'F20', 'F22']
@@ -90,9 +92,12 @@ class Example(QWidget):
 		self.motor_2_direction = self.motor_2_direction()
 
 		self.init_torch = self.torch_mode()
+		self.stationary_torch = self.torch_stationary_mode()
 		# self.final_torch = self.final_torch()
 
 		self.init_torch.activated[str].connect(self.init_torch_onSelected)
+
+		self.stationary_torch.activated[str].connect(self.stationary_torch_onSelected)
 		# self.final_torch.activated[str].connect(self.final_torch_onSelected)
 
 
@@ -304,6 +309,7 @@ class Example(QWidget):
 		self.control.camera.set_focus()
 		self.control.camera.reset_settings()
 		self.control.setAperatureAndIso(self.aperture_v, self.iso_v)
+		#self.control.torch_stationary.set_light_status(self.stationary_torch) #turn on flashlight for capture
 
 		#choose some dropdown
 		# light_mode_1 = ["HIGH", "MEDIUM", "LOW", "OFF"]
@@ -325,16 +331,7 @@ class Example(QWidget):
 			self.run_move_m1()
 			self.run_move_m2()
 
-			#set light status
-			# light[i%4] #instead of 4 use len(light)
-
-			# if (i % 2) == 0:
-			# 	self.mod_to_mod(0)
-			# 	print("LIGHT HIGH")
-				# print("current torch mode is ", torch_list[i%len(torch_list)])
-			# else:
-			# 	self.mod_to_mod(1)
-			# 	print("LIGHT LOW")
+			print("Running Stack Number {}".format(i))
 			current_mode = i % len(self.init_tor)
 			self.mod_to_mod(self.init_tor[current_mode])
 
@@ -355,12 +352,38 @@ class Example(QWidget):
 		f.write("Elapsed time: " + str(timeElapsed) + "\n")
 		f.close()
 
+		#turn off flashlights
+		self.control.torch_stationary.set_light_status(torch.LightStatus.OFF) #turn on flashlight for capture
+		self.control.torch1.set_light_status(torch.LightStatus.OFF)
+
+
+
+	def torch_stationary_mode(self):
+
+		combobox9 = QComboBox(self)
+		combobox9.addItem("HIGH")
+		combobox9.addItem("MEDIUM")
+		combobox9.addItem("LOW")
+		combobox9.addItem("FLASHING")
+		combobox9.addItem("OFF")
+
+		combobox9.setFixedWidth(180)
+		combobox9.setFixedHeight(30)
+		combobox9.move(100, 800)
+
+		self.numStacks = QLabel("Torch Stationary Mode", self)
+		self.numStacks.move(100, 780)
+
+		return combobox9
+
 	def torch_mode(self):
 
 		combobox8 = QComboBox(self)
 
+		combobox8.addItem("HIGH/HIGH/HIGH/HIGH/HIGH/MEDIUM/MEDIUM/MEDIUM/MEDIUM/MEDIUM/LOW/LOW/LOW/LOW/LOW/OFF/OFF/OFF/OFF/OFF")
 		combobox8.addItem("HIGH/MEDIUM/LOW/OFF")
 		combobox8.addItem("HIGH/MEDIUM/LOW")
+		combobox8.addItem("HIGH/LOW/OFF")
 		combobox8.addItem("HIGH/MEDIUM")
 		combobox8.addItem("HIGH/LOW")
 		combobox8.addItem("MEDIUM/LOW")
@@ -371,7 +394,6 @@ class Example(QWidget):
 		combobox8.addItem("MEDIUM")
 		combobox8.addItem("LOW")
 		combobox8.addItem("OFF")
-
 
 		# light_mode_1 = ["HIGH", "MEDIUM", "LOW", "OFF"]
 		# light_mode_2 = ["HIGH", "MEDIUM", "LOW"]
@@ -415,6 +437,13 @@ class Example(QWidget):
 	def init_torch_onSelected(self, init_tor):
 
 		self.init_tor = init_tor.split("/")
+		print("SET TORCH MODE to ", self.init_tor)
+
+	def stationary_torch_onSelected(self, torch_mode):
+		mode = self.control.torch_stationary.t_mode_to_mode(torch_mode)
+		self.control.torch_stationary.set_light_status(mode)
+
+
 
 	# def final_torch_onSelected(self, final_tor):
 	#
@@ -431,10 +460,6 @@ class Example(QWidget):
 
 		set = self.control.torch1.t_mode_to_mode(alternator_mode)
 		self.control.torch1.set_light_status(set)
-
-
-
-
 
 	def stacks(self):
 

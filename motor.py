@@ -46,21 +46,16 @@ class Motor:
             self.pulsePin.write(0)
 
     def move(self, pulses, direction):
-        print("DIRECTION SET")
         self.setDirection(direction)
 
-        print("PUSLING")
         for i in range(pulses):  # 400 pulses per revolution. range (x) / 400 is the number of revolutions
-            print("Pulse False Set")
             self.setPulse(False)
-            print("Finished Pulse False Set")
-            print("Delay Start")
             timing.delayMicroseconds(500)
-            print("Delay Finish")
+
             self.setPulse(True)
             timing.delayMicroseconds(20)
 
-        print("FINISHED PULSING")
+
         timing.delay(1000)
 
     def moveCm(self, centimeters, direction ):

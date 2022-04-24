@@ -7,7 +7,9 @@ from exif import Image
 import time
 import platform
 
-path = r"C:\Users\tedlasai\OneDrive - York University\School\York\Lab\ExposureData\FlashingLight"
+path = r"C:\Users\tedlasai\OneDrive - York University\School\York\Lab\ExposureData\100EOS5D"
+
+# path = r"C:\Users\tedlasai\PycharmProjects\ExposureStacks\Exposures\Images_Scene_1_HML"
 
 joinPathChar = "/"
 if(platform.system() == "Windows"):
