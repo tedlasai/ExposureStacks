@@ -32,6 +32,11 @@ class Torch:
         timing.delay(500)
         self.pin.mode = pyfirmata.INPUT
 
+        if (self.light_status.value <= 4):
+            self.light_status = LightStatus(self.light_status.value + 1)
+        else:
+            self.light_status = LightStatus(1)
+
     def set_light_status(self, light_status):
         # Type checking
         if not isinstance(light_status, LightStatus):
@@ -45,10 +50,7 @@ class Torch:
 
         for i in range(numToggles):
             self.toggle_button()
-            if(self.light_status.value <= 4):
-                self.light_status = LightStatus(self.light_status.value + 1)
-            else:
-                self.light_status = LightStatus(1)
+
 
 
     def t_mode_to_mode(self, mod):
