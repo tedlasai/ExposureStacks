@@ -658,13 +658,19 @@ class CheckableComboBox(QComboBox):
         return item.checkState() == Qt.Checked
 
 
+def except_hook(cls, exception, traceback):
+    sys.__excepthook__(cls, exception, traceback)
 
 
 def main():
+
+	sys.excepthook = except_hook
+
 	app = QApplication(sys.argv)
 	ex = Example()
 	ex.show()
-	sys.exit(app.exec_())
 
-if __name__ == '__main__':
+	sys.exit(app.exec_())
+if __name__ == "__main__":
+
     main()

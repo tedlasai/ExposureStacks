@@ -125,6 +125,7 @@ class Camera:
         self.set_shutter_speed(shutter_speed_number)
         self.set_aperture(aperture_number)
 
+
         shoot = self.app.EOS5DMarkIV.child_window(auto_id="takePictureButton",control_type="EOSUtility.TakePictureButton").wrapper_object()  # This magically works too for picture shooting
 
         shoot.click()
@@ -136,6 +137,8 @@ class Camera:
     def shoot_picture_with_set_aperature(self, shutter_speed_number):
 
         self.set_shutter_speed(shutter_speed_number)
+
+        timing.delay(Camera.sleepAperatureAndExposureChange)
 
         shoot = self.app.EOS5DMarkIV.child_window(auto_id="takePictureButton",control_type="EOSUtility.TakePictureButton").wrapper_object()  # This magically works too for picture shooting
 
@@ -208,6 +211,7 @@ class Camera:
             # time.sleep(num1)
         else:
             num2 = float(Fraction(new[0]))
+            print(num2)
             return num2
             # time.sleep(num2)
 
