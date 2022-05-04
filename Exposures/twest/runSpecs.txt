@@ -1,0 +1,10 @@
+Dataset name is: twest
+Shutter List is: ['1/2000', '1/2500']
+Aperture Value is: F13
+ISO Value is: 125
+Capture start time at: 04/13/2022, 00:21:01
+Number of Stacks: 2
+Motor 1 Direction: toEdge
+Motor 2 Direction: toEdge
+Motor 1 StepSize(cm): 0.1
+Motor 2 StepSize(cm): 0.1

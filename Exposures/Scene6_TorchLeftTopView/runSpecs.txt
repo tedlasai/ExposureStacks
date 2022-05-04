@@ -1,0 +1,11 @@
+Dataset name is: Scene6_TorchLeftTopView
+Shutter List is: ['15"', '8"', '6"', '4"', '2"', '1', '0"5', '1/4', '1/8', '1/15', '1/30', '1/60', '1/125', '1/250', '1/500']
+Aperture Value is: F14
+ISO Value is: 100
+Capture start time at: 04/24/2022, 18:44:14
+Number of Stacks: 100
+Motor 1 Direction: toMotor
+Motor 2 Direction: toEdge
+Motor 1 StepSize(cm): 0
+Motor 2 StepSize(cm): 0.3
+Torch Modes are: ['HIGH', 'HIGH', 'HIGH', 'HIGH', 'HIGH', 'MEDIUM', 'MEDIUM', 'MEDIUM', 'MEDIUM', 'MEDIUM', 'LOW', 'LOW', 'LOW', 'LOW', 'LOW', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF']

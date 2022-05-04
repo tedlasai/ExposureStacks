@@ -1,0 +1,12 @@
+Dataset name is: df
+Shutter List is: ['8"']
+Aperture Value is: F4.0
+ISO Value is: AUTO
+Capture start time at: 04/13/2022, 01:22:30
+Number of Stacks: 1
+Motor 1 Direction: toEdge
+Motor 2 Direction: toEdge
+Motor 1 StepSize(cm): 1
+Motor 2 StepSize(cm): 1
+Capture end time at: 04/13/2022, 01:23:28
+Elapsed time: 0:00:57.336383

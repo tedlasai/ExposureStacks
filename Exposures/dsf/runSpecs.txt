@@ -1,0 +1,10 @@
+Dataset name is: dsf
+Shutter List is: ['1/2500', '1/3200']
+Aperture Value is: F4.0
+ISO Value is: AUTO
+Capture start time at: 04/13/2022, 00:55:51
+Number of Stacks: 5
+Motor 1 Direction: toEdge
+Motor 2 Direction: toEdge
+Motor 1 StepSize(cm): 0.1
+Motor 2 StepSize(cm): 0.1

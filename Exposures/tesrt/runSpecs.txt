@@ -1,0 +1,10 @@
+Dataset name is: tesrt
+Shutter List is: ['1/20', '1/25']
+Aperture Value is: F5.0
+ISO Value is: AUTO
+Capture start time at: 04/13/2022, 00:22:25
+Number of Stacks: 2
+Motor 1 Direction: toEdge
+Motor 2 Direction: toEdge
+Motor 1 StepSize(cm): 0.1
+Motor 2 StepSize(cm): 0.1
