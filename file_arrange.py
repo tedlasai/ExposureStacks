@@ -9,6 +9,8 @@ import platform
 
 path = r"C:\Users\tedlasai\OneDrive - York University\School\York\Lab\ExposureData\100EOS5D"
 
+path = "F:\\DCIM\\101EOS5D"
+
 # path = r"C:\Users\tedlasai\PycharmProjects\ExposureStacks\Exposures\Images_Scene_1_HML"
 
 joinPathChar = "/"
@@ -35,38 +37,28 @@ dict = {'file': my_files, 'timestamp': tsp}
 df = pd.DataFrame(dict)
 df = df.sort_values(by=['timestamp'])
 
-stackSize = 28
+stackSize = 100
 
-folder_iterations = math.ceil(len(df) / stackSize)
+
 start = 0
-for i in range(0, folder_iterations):
+for i in range(0, len(my_files)):
 
-    frameNum = "{:0>2d}".format(i+1)
+    frameNum = "{:0>4d}".format(i+1)
+    try:
+        sorted_file_path = path + joinPathChar + df.iloc[start][0]
+    except:
+        exit()
 
-    while start < (i + 1) * stackSize:
 
-        try:
-            sorted_file_path = path + joinPathChar + df.iloc[start][0]
-        except:
-            exit()
+    new_file_path = path + joinPathChar + '1P0X' + frameNum + '.jpg'
+    os.rename(sorted_file_path, new_file_path)
 
-        with open(sorted_file_path, 'rb') as img_file:
-            img = Image(img_file)
+    file_name = df.iloc[start][0][:-4]
+    cr2_file = path + joinPathChar + file_name + '.CR2'
+    new_cr2_file_path = path + joinPathChar + '1P0X' + frameNum + '.CR2'
+    os.rename(cr2_file, new_cr2_file_path)
 
-        index = img.list_all().index('exposure_time')
-        exp_time = round(float(img.get(img.list_all()[index])), 5)
-
-        exp_time = "{:08.5f}".format(exp_time)
-
-        new_file_path = path + joinPathChar + 'Frame_' + frameNum + '_Shutter_Value_' + str(exp_time) + '.jpg'
-        os.rename(sorted_file_path, new_file_path)
-
-        file_name = df.iloc[start][0][:-4]
-        cr2_file = path + joinPathChar + file_name + '.CR2'
-        new_cr2_file_path = path + joinPathChar + 'Frame_' + frameNum + '_Shutter_Value_' + str(exp_time) + '.CR2'
-        os.rename(cr2_file, new_cr2_file_path)
-
-        start = start + 1
+    start = start + 1
 
     if start == len(df):
         print("break")

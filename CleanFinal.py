@@ -87,6 +87,18 @@ class Example(QWidget):
 		start_button = self.set_start_button()
 		stop_button = self.set_stop_button(start_button)
 
+		self.frame_torch_mode_1_button = self.frame_torch_mode_1()
+		self.frame_torch_mode_2_button = self.frame_torch_mode_2()
+		self.frame_torch_mode_3_button = self.frame_torch_mode_3()
+		self.frame_torch_mode_4_button = self.frame_torch_mode_4()
+		self.frame_torch_mode_5_button = self.frame_torch_mode_5()
+
+		self.frame_torch_dropdown_1_button = self.frame_torch_dropdown_1()
+		self.frame_torch_dropdown_2_button = self.frame_torch_dropdown_2()
+		self.frame_torch_dropdown_3_button = self.frame_torch_dropdown_3()
+		self.frame_torch_dropdown_4_button = self.frame_torch_dropdown_4()
+		self.frame_torch_dropdown_5_button = self.frame_torch_dropdown_5()
+
 		self.motor_1_cm = self.motor1_cm_box()
 
 
@@ -342,6 +354,167 @@ class Example(QWidget):
 		mm2.move(340, 630)
 
 		return mm2
+
+
+	def frame_torch_mode_1(self):
+
+		mv = QLineEdit(self)
+
+		mv.setFixedWidth(100)
+		mv.setFixedHeight(20)
+
+		# self.numStacks = QLabel("Motor 1 Travel \n Length (cm)", self)
+		# self.numStacks.move(50, 500)
+
+		mv.move(230, 180)
+
+		return mv
+
+	def frame_torch_mode_2(self):
+
+		mv = QLineEdit(self)
+
+		mv.setFixedWidth(100)
+		mv.setFixedHeight(20)
+
+		# self.numStacks = QLabel("Motor 1 Travel \n Length (cm)", self)
+		# self.numStacks.move(50, 500)
+
+		mv.move(230, 210)
+
+		return mv
+
+	def frame_torch_mode_3(self):
+
+		mv = QLineEdit(self)
+
+		mv.setFixedWidth(100)
+		mv.setFixedHeight(20)
+
+		# self.numStacks = QLabel("Motor 1 Travel \n Length (cm)", self)
+		# self.numStacks.move(50, 500)
+
+		mv.move(230, 240)
+
+		return mv
+
+	def frame_torch_mode_4(self):
+
+		mv = QLineEdit(self)
+
+		mv.setFixedWidth(100)
+		mv.setFixedHeight(20)
+
+		# self.numStacks = QLabel("Motor 1 Travel \n Length (cm)", self)
+		# self.numStacks.move(50, 500)
+
+		mv.move(230, 270)
+
+		return mv
+
+	def frame_torch_mode_5(self):
+
+		mv = QLineEdit(self)
+
+		mv.setFixedWidth(100)
+		mv.setFixedHeight(20)
+
+		# self.numStacks = QLabel("Motor 1 Travel \n Length (cm)", self)
+		# self.numStacks.move(50, 500)
+
+		mv.move(230, 300)
+
+		return mv
+
+	def frame_torch_dropdown_1(self):
+
+		combobox9 = QComboBox(self)
+		combobox9.addItem("HIGH")
+		combobox9.addItem("MEDIUM")
+		combobox9.addItem("LOW")
+		combobox9.addItem("FLASHING")
+		combobox9.addItem("OFF")
+
+		combobox9.setFixedWidth(80)
+		combobox9.setFixedHeight(25)
+		combobox9.move(360, 180)
+
+		# self.numStacks = QLabel("Torch Mode 1", self)
+		# self.numStacks.move(260, 180)
+
+		return combobox9
+
+	def frame_torch_dropdown_2(self):
+
+		combobox9 = QComboBox(self)
+		combobox9.addItem("HIGH")
+		combobox9.addItem("MEDIUM")
+		combobox9.addItem("LOW")
+		combobox9.addItem("FLASHING")
+		combobox9.addItem("OFF")
+
+		combobox9.setFixedWidth(80)
+		combobox9.setFixedHeight(25)
+		combobox9.move(360, 210)
+
+		# self.numStacks = QLabel("Torch Mode 1", self)
+		# self.numStacks.move(260, 180)
+
+		return combobox9
+
+	def frame_torch_dropdown_3(self):
+
+		combobox9 = QComboBox(self)
+		combobox9.addItem("HIGH")
+		combobox9.addItem("MEDIUM")
+		combobox9.addItem("LOW")
+		combobox9.addItem("FLASHING")
+		combobox9.addItem("OFF")
+
+		combobox9.setFixedWidth(80)
+		combobox9.setFixedHeight(25)
+		combobox9.move(360, 240)
+
+		# self.numStacks = QLabel("Torch Mode 1", self)
+		# self.numStacks.move(260, 180)
+
+		return combobox9
+
+	def frame_torch_dropdown_4(self):
+
+		combobox9 = QComboBox(self)
+		combobox9.addItem("HIGH")
+		combobox9.addItem("MEDIUM")
+		combobox9.addItem("LOW")
+		combobox9.addItem("FLASHING")
+		combobox9.addItem("OFF")
+
+		combobox9.setFixedWidth(80)
+		combobox9.setFixedHeight(25)
+		combobox9.move(360, 270)
+
+		# self.numStacks = QLabel("Torch Mode 1", self)
+		# self.numStacks.move(260, 180)
+
+		return combobox9
+
+	def frame_torch_dropdown_5(self):
+
+		combobox9 = QComboBox(self)
+		combobox9.addItem("HIGH")
+		combobox9.addItem("MEDIUM")
+		combobox9.addItem("LOW")
+		combobox9.addItem("FLASHING")
+		combobox9.addItem("OFF")
+
+		combobox9.setFixedWidth(80)
+		combobox9.setFixedHeight(25)
+		combobox9.move(360, 300)
+
+		# self.numStacks = QLabel("Torch Mode 1", self)
+		# self.numStacks.move(260, 180)
+
+		return combobox9
 
 
 	def torch_stationary_mode(self):
