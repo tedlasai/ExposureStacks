@@ -37,7 +37,7 @@ class Example(QWidget):
 
 		self.shutter_list = ['30"']
 		self.iso_v = '100'                  # Default ISO set at 100
-		self.aperture_v = 'F11.0'           # Default Aperture set at F14
+		self.aperture_v = 'F14'           # Default Aperture set at F14
 
 		self.motor1_direction = 'toEdge'
 		self.m2_direction = 'toEdge'
@@ -206,7 +206,7 @@ class Example(QWidget):
 		print("running")
 		L = [dataset_str, shutter_str, shutter_len, ap_str, iso_str, start_str, stack_str, m1_str, m2_str, m1_str_cm, m2_str_cm, torch_flicker_modes_str]
 
-		folderStore = os.path.join(os.path.dirname(__file__), 'Exposures', self.dataset_name_label.text())
+		folderStore = os.path.join(os.path.dirname(__file__), 'Exposures_Logs', self.dataset_name_label.text())
 		# capture the image and save it on the save path
 		os.makedirs(folderStore, exist_ok=True)
 		captureFileName = os.path.join(folderStore, "runSpecs.txt")
@@ -232,7 +232,14 @@ class Example(QWidget):
 
 			print("Running Stack Number {}".format(i))
 			current_mode = i % len(self.flicker_torch_mode)
-			#self.mod_to_mod(self.flicker_torch_mode[current_mode])
+			self.mod_to_mod(self.flicker_torch_mode[current_mode])
+
+			if i in self.frame_switch:
+
+				index = self.frame_switch.index(i)
+				light_stat = self.torch_switch[index]
+				self.stationary_torch_selected(light_stat)
+
 
 			print("current torch mode is ", self.flicker_torch_mode[current_mode])
 
@@ -442,25 +449,25 @@ class Example(QWidget):
 	def frame_modes_setup(self):
 
 		try:
-			self.torch_switch[0] = int(self.frame_torch_mode_1_button.text())
+			self.frame_switch[0] = int(self.frame_torch_mode_1_button.text())
 		except ValueError:
-			self.torch_switch[0] = 0
+			self.frame_switch[0] = 0
 		try:
-			self.torch_switch[1] = int(self.frame_torch_mode_2_button.text())
+			self.frame_switch[1] = int(self.frame_torch_mode_2_button.text())
 		except ValueError:
-			self.torch_switch[1] = 0
+			self.frame_switch[1] = 0
 		try:
-			self.torch_switch[2] = int(self.frame_torch_mode_3_button.text())
+			self.frame_switch[2] = int(self.frame_torch_mode_3_button.text())
 		except ValueError:
-			self.torch_switch[2] = 0
+			self.frame_switch[2] = 0
 		try:
-			self.torch_switch[3] = int(self.frame_torch_mode_4_button.text())
+			self.frame_switch[3] = int(self.frame_torch_mode_4_button.text())
 		except ValueError:
-			self.torch_switch[3] = 0
+			self.frame_switch[3] = 0
 		try:
-			self.torch_switch[4] = int(self.frame_torch_mode_5_button.text())
+			self.frame_switch[4] = int(self.frame_torch_mode_5_button.text())
 		except ValueError:
-			self.torch_switch[4] = 0
+			self.frame_switch[4] = 0
 
 
 	def frame_torch_dropdown_1(self):
@@ -556,43 +563,43 @@ class Example(QWidget):
 
 	def frame_torch_dropdown_1_selected(self, mode):
 
-		self.frame_switch[0] = mode
+		self.torch_switch[0] = mode
 		print("SET SWITCH 1 TORCH MODE to ", mode)
-		print(self.frame_switch)
+		print('frame mode is ', self.frame_switch)
 		self.frame_modes_setup()
-		print(self.torch_switch)
+		print('torch mode is ', self.torch_switch)
 
 	def frame_torch_dropdown_2_selected(self, mode):
 
-		self.frame_switch[1] = mode
+		self.torch_switch[1] = mode
 		print("SET SWITCH 2 TORCH MODE to ", mode)
-		print(self.frame_switch)
+		print('frame mode is ', self.frame_switch)
 		self.frame_modes_setup()
-		print(self.torch_switch)
+		print('torch mode is ', self.torch_switch)
 
 	def frame_torch_dropdown_3_selected(self, mode):
 
-		self.frame_switch[2] = mode
+		self.torch_switch[2] = mode
 		print("SET SWITCH 3 TORCH MODE to ", mode)
-		print(self.frame_switch)
+		print('frame mode is ', self.frame_switch)
 		self.frame_modes_setup()
-		print(self.torch_switch)
+		print('torch mode is ', self.torch_switch)
 
 	def frame_torch_dropdown_4_selected(self, mode):
 
-		self.frame_switch[3] = mode
+		self.torch_switch[3] = mode
 		print("SET SWITCH 4 TORCH MODE to ", mode)
-		print(self.frame_switch)
+		print('frame mode is ', self.frame_switch)
 		self.frame_modes_setup()
-		print(self.torch_switch)
+		print('torch mode is ', self.torch_switch)
 
 	def frame_torch_dropdown_5_selected(self, mode):
 
-		self.frame_switch[4] = mode
+		self.torch_switch[4] = mode
 		print("SET SWITCH 5 TORCH MODE to ", mode)
-		print(self.frame_switch)
+		print('frame mode is ', self.frame_switch)
 		self.frame_modes_setup()
-		print(self.torch_switch)
+		print('torch mode is ', self.torch_switch)
 
 
 	def torch_stationary_mode(self):
@@ -647,6 +654,7 @@ class Example(QWidget):
 		print("SET TORCH MODE to ", self.flicker_torch_mode)
 
 	def stationary_torch_selected(self, torch_flicker_mode):
+
 		mode = self.control.torch_stationary.t_mode_to_mode(torch_flicker_mode)
 		self.control.torch_stationary.set_light_status(mode)
 
@@ -660,6 +668,7 @@ class Example(QWidget):
 		# 	self.control.torch1.set_light_status(set)
 
 		set = self.control.torch1.t_mode_to_mode(alternator_mode)
+		# self.control.torch1.set_light_status(set)
 		self.control.torch1.set_light_status(set)
 
 	def flashlight_toggle_button(self):
@@ -695,7 +704,7 @@ class Example(QWidget):
 
 		combobox2 = QComboBox()
 		combobox2.addItems(aperture_data)
-		combobox2.setCurrentIndex(2)
+		combobox2.setCurrentIndex(11)
 		combobox2.setFixedWidth(100)
 		combobox2.setFixedHeight(20)
 
@@ -705,6 +714,7 @@ class Example(QWidget):
 
 		combobox3 = QComboBox()
 		combobox3.addItems(iso_data)
+		combobox3.setCurrentIndex(1)
 		combobox3.setFixedWidth(100)
 		combobox3.setFixedHeight(20)
 

@@ -1,0 +1,60 @@
+# @package _global_
+
+# specify here default training configuration
+defaults:
+  - _self_
+
+  # enable color logging
+  - override hydra/hydra_logging: colorlog
+  - override hydra/job_logging: colorlog
+
+# path to original working directory
+# hydra hijacks working directory by changing it to the current log directory,
+# so it's useful to have this path as a special variable
+# https://hydra.cc/docs/next/tutorials/basic/running_your_app/working_directory
+work_dir: ${hydra:runtime.cwd}
+
+# pretty print config at the start of the run using Rich library
+print_config: True
+
+# disable python warnings if they annoy you
+ignore_warnings: True
+
+device: DSLR # R3CRB0BW3KA or DSLR or R5CRB0VX8VV or 1A221FDF60091C
+
+# Luminaire Manager config
+frame_duration: 10
+n_lights: 1844
+method_create_lumenscript: predefined_frames #predefined_frames #using_SPD #using_SFU_data # using_thermal_target_CT or using_channel_drive_level or using_SFU_data
+start_temperature: 1500
+thermal_sweep_value: 85
+telelumen_plot_dir: C:\Users\hoang.le1\Documents\GitHub\telelumen\York-University-20220112\tmp
+screenshot_dir: C:\Users\hoang.le1\Documents\GitHub\lightbox-data-collector\screenshots
+# save_lumenscript: True
+lumenscript_dir: C:\Users\tedlasai\PycharmProjects\ExposureStacks\lightboxcapture
+lumenscript_filename: off_and_led.lss #PhotoLED_power_800_2022-08-23_12-27-24.lss #SFU_PhotoLED_norm_800W_2022-09-01_14-38-38.lss #PhotoLED_power_800_2022-08-23_12-27-24.lss or sfu_lights_rescale_power_800W.lss or SFU_power_800_2022-08-23_12-10-37.lss
+frames_path: D:\python-hminle\SS\code\lightbox-data-collector\data\illuminants\train_val_test_illuminants.p # C:\Users\hoang.le1\Documents\datasets\GTI_dataset\SFU_PhotoLED_LSPDD_RLSS_800W_2022-11-24_10-38-17\SFU_PhotoLED_LSPDD_RLSS_800W_2022-11-24_10-38-17_All_info.p
+
+# For change folder name
+# Check frames_path above
+device_type: phone # phone or DSLR
+scene_name: colorchart_04
+# SN_R3CRB0BW3KA_S2203220012 - SN_R5CRB0VX8VV_S2204260005 - Pixel_6 - Canon_EOS_Rebel_SL2
+# Shorter names: R3_S22_Plus - R5_S22_Ultra - Pixel6 - Canon
+camera_name: R5_S22_Ultra
+root_dir: D:\Dataset\SFU_PhotoLED_LSPP_RealSource\colorcharts
+input_dir: D:\Dataset\SFU_PhotoLED_LSPP_RealSource\R5_Galaxy_S22_Ultra\Colorchart04 #C:\Users\hoang.le1\Documents\datasets\GTI_dataset\PhotoLED_power_800_2022-08-23_12-27-24\DataCollector
+
+# Collector config
+is_loop_through_frames: False
+is_create_lumenscript: False
+is_capture_image: False
+is_change_folder_name: False
+is_get_SPD_plot: False
+
+seed: 2022
+
+# Notify
+is_notify: False
+
+waiting_before_capture: 10 # seconds

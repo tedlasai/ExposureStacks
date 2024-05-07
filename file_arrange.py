@@ -9,7 +9,7 @@ import platform
 
 path = r"C:\Users\tedlasai\OneDrive - York University\School\York\Lab\ExposureData\100EOS5D"
 
-path = "F:\\DCIM\\101EOS5D"
+path = "I:\\Final\\S14"
 
 # path = r"C:\Users\tedlasai\PycharmProjects\ExposureStacks\Exposures\Images_Scene_1_HML"
 

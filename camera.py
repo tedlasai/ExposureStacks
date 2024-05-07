@@ -8,7 +8,7 @@ import GS_timing as timing
 
 class Camera:
 
-    sleepAperatureAndExposureChange = 2000 #ms
+    sleepAperatureAndExposureChange = 3000 #ms
 
     sendKeysPause = 0.1
 
@@ -53,7 +53,9 @@ class Camera:
             # win.print_control_identifiers()
             win['Remote Shooting'].click()
             win['Remote Shooting'].click()
-        except:  # if it shows the GUI of camera
+        except:  # if it shows the GUI of cam
+
+            # era
             pass
 
         self.app.window(title_re=".*EOS 5D.*")
@@ -119,6 +121,15 @@ class Camera:
         timing.delay(Camera.sleepAperatureAndExposureChange)
         send_keys('{ENTER}', pause = self.sendKeysPause, with_spaces=True)
         timing.delay(Camera.sleepAperatureAndExposureChange)
+
+    def just_shoot_picture(self, delay_s):
+        shoot = self.app.EOS5DMarkIV.child_window(auto_id="takePictureButton",control_type="EOSUtility.TakePictureButton").wrapper_object()  # This magically works too for picture shooting
+
+        shoot.click()
+
+        #change sleep time depending on shutter speed time
+        sleep_time = delay_s
+        timing.delay(sleep_time*1000)
 
     def shoot_picture(self, shutter_speed_number, aperture_number):
 

@@ -1,4 +1,4 @@
-import Camera
+import camera
 import motor
 import torch
 
@@ -6,9 +6,9 @@ class Control():
 
     def __init__(self):
 
-        self.camera = Camera.Camera()
+        self.camera = camera.Camera()
         self.motor1 = motor.Motor(directionPin=6, pulsePin=8, cmToPulses= 812 , invertDirection=False)
-        self.motor2 = motor.Motor(directionPin=11, pulsePin=13, cmToPulses= 790, invertDirection=True)
+        self.motor2 = motor.Motor(directionPin=11, pulsePin=13, cmToPulses= 406, invertDirection=True, rotatingMotor=False) #790
 
         self.torch1 = torch.Torch(pin=2)
         self.torch_stationary = torch.Torch(pin=4)

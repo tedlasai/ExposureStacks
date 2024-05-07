@@ -4,13 +4,14 @@ from arduino import board
 
 class Motor:
 
-    def __init__(self,directionPin, pulsePin, cmToPulses,  invertDirection = False):
+    def __init__(self,directionPin, pulsePin, cmToPulses,  invertDirection = False, rotatingMotor = False):
 
         self.directionPin = board.get_pin('d:{}:o'.format(directionPin))
         self.pulsePin = board.get_pin('d:{}:o'.format(pulsePin))
 
         self.invertDirection = invertDirection
         self.cmToPulses = cmToPulses
+        self.rotatingMotor = rotatingMotor
 
 
     #direction is boolean because it can only be forward or backward
@@ -54,6 +55,10 @@ class Motor:
 
             self.setPulse(True)
             timing.delayMicroseconds(20)
+
+            #speed delay
+            if self.rotatingMotor:
+                timing.delayMicroseconds(50000)
 
 
         timing.delay(1000)
