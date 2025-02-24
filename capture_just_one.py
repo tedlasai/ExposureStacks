@@ -50,10 +50,10 @@ from Sony_camera import SonyCamera
 import keyboard  # for keyboard input
 
 start_time = time.time()
+my_motor = Motor(directionPin=11, pulsePin=13, cmToPulses=406, invertDirection=True, rotatingMotor=False)
 end_time = time.time()
 print(f"Time taken for initial motor: {end_time - start_time} seconds")
 
-my_motor = Motor(directionPin=11, pulsePin=13, cmToPulses=406, invertDirection=True, rotatingMotor=False)
 conf = OmegaConf.load("lightboxcapture/config.yaml")
 end_time = time.time()
 print(f"Time taken for initial conf: {end_time - start_time} seconds")
@@ -70,23 +70,23 @@ print(f"Time taken for initial sony: {end_time - start_time} seconds")
 
 for iteration in range(25):
 
-    for k in range(0, 3):
-        lm.load_lumenscript()
-        time.sleep(1)  # 1s sleep
-        for i in range(0, 8):
-            sony_camera.click_button()
-            lm.increase_lumen_frame()
-            time.sleep(3)  # 1s sleep
+    lm.load_lumenscript()
+    time.sleep(1)  # 1s sleep
 
-        # Move motor twice (but not on the last one obviously)
-        if k != 2:
-            time.sleep(4)
-            my_motor.moveCm(2.0, "toMotor")
 
-    # RESET
-    my_motor.moveCm(4.0, "toEdge")
-    print(f"Iteration {iteration + 1} complete. Press 'space' to continue.")
-    # Wait for the user to press 'space' before continuing to the next loop
+    for i in range(0, 8):
+        sony_camera.click_button()
+        lm.increase_lumen_frame()
+
+    conf = OmegaConf.load("lightboxcapture/config_sensormap.yaml")
+    lm = LuminaireManager(conf)
+    lm.init()
+    lm.load_lumenscript()
+
+    for i in range(0, 6):
+        sony_camera.click_button()
+        lm.increase_lumen_frame()
+
 
     keyboard.wait('space')
     time.sleep(10)
